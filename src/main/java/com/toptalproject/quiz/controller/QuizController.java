@@ -2,6 +2,7 @@ package com.toptalproject.quiz.controller;
 
 import com.toptalproject.quiz.dto.request.QuizRequest;
 import com.toptalproject.quiz.service.QuizService;
+import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ public class QuizController {
   }
   private final QuizService quizService;
   @PostMapping
-  public void createQuiz(@RequestBody QuizRequest request){
+  public void createQuiz(@Valid @RequestBody QuizRequest request){
     quizService.createQuiz(request);
   }
   @PutMapping("/{id}")

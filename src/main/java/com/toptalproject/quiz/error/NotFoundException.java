@@ -1,4 +1,4 @@
-package com.toptalproject.quiz;
+package com.toptalproject.quiz.error;
 
 import com.toptalproject.quiz.data.entity.Quiz;
 import java.util.UUID;

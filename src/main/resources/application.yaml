@@ -39,7 +39,7 @@ logging:
           '*': ${LOGGING_LEVEL:DEBUG}
     org:
       springframework:
-        security: trace
+        security: INFO
 
 app:
   clientConfigs:

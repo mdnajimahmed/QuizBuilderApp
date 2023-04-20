@@ -1,6 +1,6 @@
 package com.toptalproject.quiz.controller;
 
-import com.toptalproject.quiz.BadRequestException;
+import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.config.AppClients;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

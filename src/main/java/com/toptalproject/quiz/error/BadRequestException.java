@@ -1,4 +1,4 @@
-package com.toptalproject.quiz;
+package com.toptalproject.quiz.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
