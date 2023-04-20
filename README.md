@@ -1,2 +1,2 @@
-# QuizBuilderApp
-Quiz Builder App Take home project from Toptal
+# Sign Up URI
+https://toptalquizapp.auth.ap-southeast-2.amazoncognito.com/signup?client_id=5ftl126gqojiaf12at2lhvf634&response_type=code&scope=email+openid+phone&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fwelcome

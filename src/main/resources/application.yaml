@@ -1,0 +1,49 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_JCYjAO7Ee
+  flyway:
+    enabled: true
+    baselineVersion: 0.0.0.0
+    schemas: public
+    baseline-on-migrate: true
+    placeholder-replacement: false
+    locations: classpath:db/migration
+    outOfOrder: true
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    properties:
+      hibernate:
+        format_sql=true:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+  datasource:
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:postgres}
+    url: jdbc:postgresql://${DB_URL:localhost}:5432/${DB_NAME:postgres}
+    hikari:
+      schema: public
+logging:
+  level:
+    com:
+      toptalproject:
+        quiz:
+          '*': ${LOGGING_LEVEL:DEBUG}
+    org:
+      springframework:
+        security: trace
+
+app:
+  clientConfigs:
+    - clientId: ${WEB_CLIENT_ID:5ftl126gqojiaf12at2lhvf634}
+      redirectUri: ${WEB_REDIRECT_URI:http://localhost:8080/welcome}
+
+
