@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +41,6 @@ class QuizServiceImpl implements QuizService {
     quizRepository.save(quiz);
     return buildQuizDto(quiz);
   }
-
 
 
   @Override
@@ -105,8 +107,27 @@ class QuizServiceImpl implements QuizService {
     if (answer.getQuestion().getAnswers().size() < 3) {
       throw new BadRequestException("Question should have at least 2 answers");
     }
+    Question question = answer.getQuestion();
     answer.getQuestion().removeAnswer(answer);
-    validateQuestion(answer.getQuestion());
+    validateQuestion(question);
+  }
+
+  @Override
+  public List<QuizDto> getQuizzes() {
+    return null;
+  }
+
+  @Override
+  public QuizDto getQuizById(UUID id) {
+    Quiz quiz = quizRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
+    return buildQuizDto(quiz);
+  }
+
+  @Override
+  public Page<QuizDto> getQuiz(int page, int limit) {
+    PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+    return quizRepository.findAll(pageRequest).map(this::buildQuizDto);
   }
 
   private Question mapToQuestion(QuestionDto questionRequest) {

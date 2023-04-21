@@ -24,7 +24,6 @@ public class Quiz extends BaseEntity {
   private String title;
   private boolean published;
   @Column(name = "published_at")
-  @CreatedDate
   private LocalDateTime publishedAt;
   @OneToMany(mappedBy = "quiz",fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.REMOVE},orphanRemoval = true)
   private List<Question> questions = new ArrayList<>();
