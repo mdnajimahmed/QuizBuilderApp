@@ -39,9 +39,10 @@ public class QuizController {
 
   @GetMapping
   public Page<QuizDto> getQuiz(
-      @RequestParam("page") @Valid @Min (value = 0,message = "Page number needs to be non zero")int page,
+      @RequestParam("page")
+      @Valid @Min(value = 0, message = "Page number needs to be non zero") int page,
       @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
-    return quizService.getQuiz(page,limit);
+    return quizService.getQuiz(page, limit);
   }
 
   @PostMapping
@@ -54,6 +55,12 @@ public class QuizController {
     quizService.updateQuiz(id, request);
   }
 
+  @DeleteMapping("/{id}")
+  public void deleteQuizById(@PathVariable("id") UUID id) {
+    quizService.deleteQuizById(id);
+  }
+
+
   @PostMapping("/{id}/publish")
   public void publishQuiz(@PathVariable("id") UUID id) {
     quizService.publishQuiz(id);
@@ -61,27 +68,27 @@ public class QuizController {
 
   @PostMapping("/{id}/questions")
   public void addQuestion(@PathVariable("id") UUID quizId, @RequestBody QuestionDto request) {
-    quizService.addQuestion(quizId,request);
+    quizService.addQuestion(quizId, request);
   }
 
   @PostMapping("/{id}/questions/{questionId}")
   public void updateQuestion(@PathVariable("id") UUID quizId,
                              @PathVariable("questionId") UUID questionId,
                              @RequestBody QuestionDto request) {
-    quizService.updateQuestion(quizId,questionId,request);
+    quizService.updateQuestion(quizId, questionId, request);
   }
 
   @DeleteMapping("/{id}/questions/{questionId}")
   public void deleteQuestion(@PathVariable("id") UUID quizId,
                              @PathVariable("questionId") UUID questionId) {
-    quizService.deleteQuestion(quizId,questionId);
+    quizService.deleteQuestion(quizId, questionId);
   }
 
   @PostMapping("/{id}/questions/{questionId}/answers")
   public void addAnswer(@PathVariable("id") UUID quizId,
                         @PathVariable("questionId") UUID questionId,
                         @RequestBody AnswerDto request) {
-    quizService.addAnswerToQuestion(quizId,questionId,request);
+    quizService.addAnswerToQuestion(quizId, questionId, request);
   }
 
   @PostMapping("/{id}/questions/{questionId}/answers/{answerId}")
@@ -89,13 +96,13 @@ public class QuizController {
                            @PathVariable("questionId") UUID questionId,
                            @PathVariable("answerId") UUID answerId,
                            @RequestBody AnswerDto request) {
-    quizService.updateAnswerToQuestion(quizId,questionId,answerId,request);
+    quizService.updateAnswerToQuestion(quizId, questionId, answerId, request);
   }
 
   @DeleteMapping("/{id}/questions/{questionId}/answers/{answerId}")
   public void deleteAnswer(@PathVariable("id") UUID quizId,
                            @PathVariable("questionId") UUID questionId,
                            @PathVariable("answerId") UUID answerId) {
-    quizService.deleteAnswer(quizId,questionId,answerId);
+    quizService.deleteAnswer(quizId, questionId, answerId);
   }
 }

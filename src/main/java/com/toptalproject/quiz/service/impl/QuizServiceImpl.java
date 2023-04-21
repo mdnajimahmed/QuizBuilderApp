@@ -125,6 +125,12 @@ class QuizServiceImpl implements QuizService {
     return quizRepository.findAll(pageRequest).map(this::buildQuizDto);
   }
 
+  @Override
+  public void deleteQuizById(UUID id) {
+    Quiz quiz = selectQuizForUpdate(id);
+    quizRepository.delete(quiz);
+  }
+
   private Question mapToQuestion(QuestionDto questionRequest) {
     Question question = new Question();
     question.setText(questionRequest.getText());

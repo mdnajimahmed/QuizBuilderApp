@@ -39,4 +39,7 @@ public interface QuizService {
   QuizDto getQuizById(UUID id);
 
   Page<QuizDto> getQuiz(int page, int limit);
+
+  @Transactional
+  void deleteQuizById(UUID id);
 }

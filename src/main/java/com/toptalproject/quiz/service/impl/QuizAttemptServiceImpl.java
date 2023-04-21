@@ -16,13 +16,13 @@ import com.toptalproject.quiz.service.QuizAttemptService;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class QuizAttemptServiceImpl implements QuizAttemptService {
@@ -39,14 +39,13 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   @Override
-  @Transactional
   public void createQuizAttempt(QuizDto request) {
     Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
         () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
-    if(!quiz.isPublished()){
+    if (!quiz.isPublished()) {
       throw new BadRequestException("Quiz has not published yet");
     }
-    if(quizAttemptRepository.existsByQuizAndCreatedBy(quiz,principal.getCurrentAuditor().get())){
+    if (quizAttemptRepository.existsByQuizAndCreatedBy(quiz, principal.getCurrentAuditor().get())) {
       throw new BadRequestException("user has already attempted the quiz");
     }
     QuizAttempt quizAttempt = new QuizAttempt();
@@ -59,7 +58,6 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
 
-
   private void updateQuestionAttempt(QuizAttempt quizAttempt, QuizDto request) {
     request.getQuestions().forEach(questionAttemptRequest -> {
       Question question = quizAttempt.getQuiz().getQuestions().stream()
@@ -67,6 +65,9 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
           .orElseThrow(() -> new NotFoundException(
               Question.class.getCanonicalName(), questionAttemptRequest.getId()
           ));
+      if (!question.isMultipleAnswer() && questionAttemptRequest.getAnswers().size() > 1) {
+        throw new BadRequestException("Multiple answer not allowed in a single answer question");
+      }
       String selectedIds = questionAttemptRequest.getAnswers().stream()
           .map(answerAttemptRequest -> answerAttemptRequest.getId().toString())
           .collect(Collectors.joining(","));
@@ -136,14 +137,15 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   @Override
   public Page<QuizDto> getAttempts(int page, int limit) {
     PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-    return quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(),pageRequest)
+    return quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(), pageRequest)
         .map(this::buildQuizAttempt);
   }
 
   @Override
   public Page<QuizDto> getQuizStat(int page, Integer limit) {
     PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-    return quizAttemptRepository.findByQuizCreatedBy(principal.getCurrentAuditor().get(),pageRequest)
+    return quizAttemptRepository.findByQuizCreatedBy(principal.getCurrentAuditor().get(),
+            pageRequest)
         .map(this::buildQuizAttempt);
   }
 
@@ -155,7 +157,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .title(quizAttempt.getQuiz().getTitle())
         .score(quizAttempt.getScore())
         .attemptedBy(quizAttempt.getCreatedBy())
-        .questions(quizAttempt.getQuestionAttempts().stream().map(this::buildQuestionAttemptDto).toList())
+        .questions(
+            quizAttempt.getQuestionAttempts().stream().map(this::buildQuestionAttemptDto).toList())
         .build();
   }
 
@@ -165,7 +168,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .text(questionAttempt.getQuestion().getText())
         .multipleAnswer(questionAttempt.getQuestion().isMultipleAnswer())
         .score(questionAttempt.getScore())
-        .answers(buildAnswerDto(questionAttempt.getQuestion().getAnswers(),questionAttempt.getSelectedAnswerIds()))
+        .answers(buildAnswerDto(questionAttempt.getQuestion().getAnswers(),
+            questionAttempt.getSelectedAnswerIds()))
         .build();
   }
 
@@ -173,10 +177,10 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     Map<String, Boolean> selected = Arrays.stream(selectedAnswerIds.split(",")).collect(
         Collectors.toMap(s -> s, s -> true));
     return answers.stream().map(
-        answer -> buildAnswerDto(answer,selected.getOrDefault(answer.getId(),false))).toList();
+        answer -> buildAnswerDto(answer, selected.getOrDefault(answer.getId(), false))).toList();
   }
 
-  private AnswerDto buildAnswerDto(Answer answer,boolean isSelected) {
+  private AnswerDto buildAnswerDto(Answer answer, boolean isSelected) {
     return AnswerDto.builder()
         .text(answer.getText())
         .id(answer.getId())
