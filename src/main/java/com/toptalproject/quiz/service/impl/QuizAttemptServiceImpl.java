@@ -15,6 +15,7 @@ import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.service.QuizAttemptService;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,13 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   private final QuizRepository quizRepository;
   private final QuizAttemptRepository quizAttemptRepository;
 
-  QuizAttemptServiceImpl(QuizRepository quizRepository, QuizAttemptRepository quizAttemptRepository) {
+  private final AuditorAware<String> principal;
+
+  QuizAttemptServiceImpl(QuizRepository quizRepository, QuizAttemptRepository quizAttemptRepository,
+                         AuditorAware<String> principal) {
     this.quizRepository = quizRepository;
     this.quizAttemptRepository = quizAttemptRepository;
+    this.principal = principal;
   }
 
   @Override
@@ -33,6 +38,9 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   public void createQuizAttempt(QuizDto request) {
     Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
         () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
+    if(quizAttemptRepository.existsByQuizAndCreatedBy(quiz,principal.getCurrentAuditor().get())){
+      throw new BadRequestException("user has already attempted the quiz");
+    }
     QuizAttempt quizAttempt = new QuizAttempt();
     quizAttempt.setQuiz(quiz);
     updateQuestionAttempt(quizAttempt, request);
