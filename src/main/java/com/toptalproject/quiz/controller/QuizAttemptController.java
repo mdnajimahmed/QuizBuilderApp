@@ -1,6 +1,6 @@
 package com.toptalproject.quiz.controller;
 
-import com.toptalproject.quiz.dto.request.QuizAttemptRequest;
+import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.service.QuizAttemptService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +18,7 @@ public class QuizAttemptController {
   }
 
   @PostMapping
-  public ResponseEntity createAttempt(@RequestBody QuizAttemptRequest quizAttemptRequest){
+  public ResponseEntity createAttempt(@RequestBody QuizDto quizAttemptRequest){
     quizAttemptService.createQuizAttempt(quizAttemptRequest);
     return ResponseEntity.ok().build();
   }

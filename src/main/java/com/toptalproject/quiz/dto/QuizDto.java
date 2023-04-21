@@ -1,17 +1,26 @@
-package com.toptalproject.quiz.dto.request;
+package com.toptalproject.quiz.dto;
 
-import com.toptalproject.quiz.dto.ValidQuestion;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class QuizRequest  {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class QuizDto {
+  private UUID id;
   @NotEmpty(message = "quiz title can not be empty")
   private String title;
   private boolean published;
+  private LocalDateTime publishedAt;
   @Size(min = 1,max = 10, message = "The quiz is allowed to have at least 1 and at most 10 questions")
-  List<@ValidQuestion QuestionRequest> questions = new ArrayList<>();
+  List<QuestionDto> questions = new ArrayList<>();
 }

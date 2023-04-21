@@ -18,7 +18,6 @@ public class RegistrationController {
     this.appClients = appClients;
   }
 
-
   @GetMapping("/sign-up")
   public void getHealthCheck(
       final HttpServletResponse response, @RequestParam("clientId")final String clientId) throws IOException {

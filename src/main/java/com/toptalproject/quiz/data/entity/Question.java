@@ -22,12 +22,19 @@ public class Question extends BaseEntity {
   private String text;
   private boolean isMultipleAnswer;
   @ManyToOne
-  @JoinColumn(name="quiz_id", nullable=false)
+  @JoinColumn(name = "quiz_id", nullable = false)
   private Quiz quiz;
-  @OneToMany(mappedBy = "question",fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
+  @OneToMany(mappedBy = "question", fetch = FetchType.EAGER,
+      cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
   private List<Answer> answers = new ArrayList<>();
-  public void addAnswer(Answer answer){
+
+  public void addAnswer(Answer answer) {
     this.answers.add(answer);
     answer.setQuestion(this);
+  }
+
+  public void removeAnswer(Answer answer) {
+    this.answers.remove(answer);
+    answer.setQuestion(null);
   }
 }

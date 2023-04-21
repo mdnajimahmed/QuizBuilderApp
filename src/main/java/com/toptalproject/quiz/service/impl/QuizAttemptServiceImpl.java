@@ -7,9 +7,9 @@ import com.toptalproject.quiz.data.entity.Quiz;
 import com.toptalproject.quiz.data.entity.QuizAttempt;
 import com.toptalproject.quiz.data.repository.QuizAttemptRepository;
 import com.toptalproject.quiz.data.repository.QuizRepository;
-import com.toptalproject.quiz.dto.request.AnswerAttemptRequest;
-import com.toptalproject.quiz.dto.request.QuestionAttemptRequest;
-import com.toptalproject.quiz.dto.request.QuizAttemptRequest;
+import com.toptalproject.quiz.dto.AnswerDto;
+import com.toptalproject.quiz.dto.QuestionDto;
+import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.service.QuizAttemptService;
@@ -30,9 +30,9 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
   @Override
   @Transactional
-  public void createQuizAttempt(QuizAttemptRequest request) {
-    Quiz quiz = quizRepository.findById(request.getQuizId()).orElseThrow(
-        () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getQuizId()));
+  public void createQuizAttempt(QuizDto request) {
+    Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
+        () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
     QuizAttempt quizAttempt = new QuizAttempt();
     quizAttempt.setQuiz(quiz);
     updateQuestionAttempt(quizAttempt, request);
@@ -42,18 +42,18 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     quizAttemptRepository.save(quizAttempt);
   }
 
-  private void updateQuestionAttempt(QuizAttempt quizAttempt, QuizAttemptRequest request) {
-    request.getQuestionAttemptRequests().forEach(questionAttemptRequest -> {
+  private void updateQuestionAttempt(QuizAttempt quizAttempt, QuizDto request) {
+    request.getQuestions().forEach(questionAttemptRequest -> {
       Question question = quizAttempt.getQuiz().getQuestions().stream()
-          .filter(q -> q.getId().equals(questionAttemptRequest.getQuestionId())).findAny()
+          .filter(q -> q.getId().equals(questionAttemptRequest.getId())).findAny()
           .orElseThrow(() -> new NotFoundException(
-              Question.class.getCanonicalName(), questionAttemptRequest.getQuestionId()
+              Question.class.getCanonicalName(), questionAttemptRequest.getId()
           ));
-      String selectedIds = questionAttemptRequest.getAnswerAttempts().stream()
-          .map(answerAttemptRequest -> answerAttemptRequest.getAnswerId().toString())
+      String selectedIds = questionAttemptRequest.getAnswers().stream()
+          .map(answerAttemptRequest -> answerAttemptRequest.getId().toString())
           .collect(Collectors.joining(","));
       QuestionAttempt questionAttempt = new QuestionAttempt();
-      questionAttempt.setSkipped(questionAttemptRequest.getAnswerAttempts().isEmpty());
+      questionAttempt.setSkipped(questionAttemptRequest.getAnswers().isEmpty());
       questionAttempt.setQuestion(question);
       questionAttempt.setScore(
           calculateQuestionScore(question, questionAttemptRequest));
@@ -64,17 +64,17 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
 
   private double calculateQuestionScore(Question question,
-                                        QuestionAttemptRequest questionAttemptRequest) {
+                                        QuestionDto questionAttemptRequest) {
     if (question.isMultipleAnswer()) {
       return calculateMultipleAnswerQuestionScore(question.getAnswers(),
-          questionAttemptRequest.getAnswerAttempts());
+          questionAttemptRequest.getAnswers());
     }
     return calculateSingleAnswerQuestionScore(question.getAnswers(),
-        questionAttemptRequest.getAnswerAttempts());
+        questionAttemptRequest.getAnswers());
   }
 
   private double calculateMultipleAnswerQuestionScore(List<Answer> answers,
-                                                      List<AnswerAttemptRequest> answerAttempts) {
+                                                      List<AnswerDto> answerAttempts) {
     if (answerAttempts.size() == 0) {
       return 0;
     }
@@ -86,7 +86,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     double score = 0;
     for (Answer answer : answers) {
       boolean isSelected = answerAttempts.stream().filter(answerAttemptRequest ->
-          answerAttemptRequest.getAnswerId().equals(answer.getId())).count() == 1;
+          answerAttemptRequest.getId().equals(answer.getId())).count() == 1;
       if (isSelected) {
         if (answer.isCorrect()) {
           score += 1 / correct;
@@ -99,7 +99,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   private double calculateSingleAnswerQuestionScore(List<Answer> answers,
-                                                    List<AnswerAttemptRequest> answerAttempts) {
+                                                    List<AnswerDto> answerAttempts) {
     if (answerAttempts.isEmpty()) {
       return 0;
     }
@@ -108,8 +108,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     }
     Answer correctAnswer = answers.stream().filter(Answer::isCorrect).findAny()
         .orElseThrow(RuntimeException::new);
-    AnswerAttemptRequest attemptedAnswer = answerAttempts.get(0);
-    if (correctAnswer.getId().equals(attemptedAnswer.getAnswerId())) {
+    AnswerDto attemptedAnswer = answerAttempts.get(0);
+    if (correctAnswer.getId().equals(attemptedAnswer.getId())) {
       return 1;
     }
     return -1;

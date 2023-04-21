@@ -1,6 +1,5 @@
 package com.toptalproject.quiz.error;
 
-import com.toptalproject.quiz.data.entity.Quiz;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
