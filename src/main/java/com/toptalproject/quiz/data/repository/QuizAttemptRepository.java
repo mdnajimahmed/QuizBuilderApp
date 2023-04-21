@@ -14,5 +14,5 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, UUID> 
 
   Page<QuizAttempt> findByCreatedBy(String createdBy, PageRequest pageRequest);
 
-  Page<QuizAttempt> findByQuizCreatedBy(String quizCreatedBy, PageRequest pageRequest);
+  Page<QuizAttempt> findByQuiz(Quiz quiz, PageRequest pageRequest);
 }

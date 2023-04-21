@@ -11,5 +11,5 @@ public interface QuizAttemptService {
 
   Page<QuizDto> getAttempts( int page, int limit);
 
-  Page<QuizDto> getQuizStat(int page, Integer limit);
+  Page<QuizDto> getQuizStat(UUID id, int page, Integer limit);
 }

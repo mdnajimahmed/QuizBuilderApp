@@ -142,10 +142,14 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   @Override
-  public Page<QuizDto> getQuizStat(int page, Integer limit) {
+  public Page<QuizDto> getQuizStat(UUID id, int page, Integer limit) {
+    Quiz quiz = quizRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
+    if (!quiz.getCreatedBy().equals(principal.getCurrentAuditor().get())) {
+      throw new BadRequestException("user can not view stat created by others");
+    }
     PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-    return quizAttemptRepository.findByQuizCreatedBy(principal.getCurrentAuditor().get(),
-            pageRequest)
+    return quizAttemptRepository.findByQuiz(quiz, pageRequest)
         .map(this::buildQuizAttempt);
   }
 

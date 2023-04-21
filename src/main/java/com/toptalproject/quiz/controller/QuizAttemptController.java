@@ -5,9 +5,11 @@ import com.toptalproject.quiz.service.QuizAttemptService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,10 +38,11 @@ public class QuizAttemptController {
     return quizAttemptService.getAttempts(page,limit);
   }
 
-  @GetMapping("/stat")
+  @GetMapping("/stat/{id}")
   public Page<QuizDto> getQuizStat(
-      @RequestParam("page") @Valid @Min (value = 0,message = "Page number needs to be non zero")int page,
+      @PathVariable("id")UUID id,
+      @RequestParam("page")@Valid@Min (value = 0,message = "Page number needs to be non zero")int page,
       @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
-    return quizAttemptService.getQuizStat(page,limit);
+    return quizAttemptService.getQuizStat(id,page,limit);
   }
 }
