@@ -137,6 +137,13 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .map(this::buildQuizAttempt);
   }
 
+  @Override
+  public Page<QuizDto> getQuizStat(int page, Integer limit) {
+    PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+    return quizAttemptRepository.findByQuizCreatedBy(principal.getCurrentAuditor().get(),pageRequest)
+        .map(this::buildQuizAttempt);
+  }
+
   private QuizDto buildQuizAttempt(QuizAttempt quizAttempt) {
     return QuizDto.builder()
         .id(quizAttempt.getQuiz().getId())

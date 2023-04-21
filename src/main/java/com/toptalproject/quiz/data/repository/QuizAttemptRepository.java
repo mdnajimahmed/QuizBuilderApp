@@ -3,6 +3,7 @@ package com.toptalproject.quiz.data.repository;
 import com.toptalproject.quiz.data.entity.Quiz;
 import com.toptalproject.quiz.data.entity.QuizAttempt;
 import com.toptalproject.quiz.dto.QuizDto;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,4 +13,6 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, UUID> 
   boolean existsByQuizAndCreatedBy(Quiz quiz, String createdBy);
 
   Page<QuizAttempt> findByCreatedBy(String createdBy, PageRequest pageRequest);
+
+  Page<QuizAttempt> findByQuizCreatedBy(String quizCreatedBy, PageRequest pageRequest);
 }

@@ -9,4 +9,6 @@ public interface QuizAttemptService {
   void createQuizAttempt(QuizDto request);
 
   Page<QuizDto> getAttempts(int page, int limit);
+
+  Page<QuizDto> getQuizStat(int page, Integer limit);
 }

@@ -35,4 +35,11 @@ public class QuizAttemptController {
       @RequestParam("limit") @Min(1) @Max(100) int limit) {
     return quizAttemptService.getAttempts(page,limit);
   }
+
+  @GetMapping("/stat")
+  public Page<QuizDto> getQuizStat(
+      @RequestParam("page") @Valid @Min (value = 0,message = "Page number needs to be non zero")int page,
+      @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
+    return quizAttemptService.getQuizStat(page,limit);
+  }
 }
