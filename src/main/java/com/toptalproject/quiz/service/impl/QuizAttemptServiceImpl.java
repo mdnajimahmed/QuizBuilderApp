@@ -43,6 +43,9 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   public void createQuizAttempt(QuizDto request) {
     Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
         () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
+    if(!quiz.isPublished()){
+      throw new BadRequestException("Quiz has not published yet");
+    }
     if(quizAttemptRepository.existsByQuizAndCreatedBy(quiz,principal.getCurrentAuditor().get())){
       throw new BadRequestException("user has already attempted the quiz");
     }
