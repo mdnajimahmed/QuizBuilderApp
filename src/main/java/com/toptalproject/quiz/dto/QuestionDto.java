@@ -14,7 +14,8 @@ public class QuestionDto {
   private UUID id;
   @NotEmpty(message = "Question text can not be empty")
   private String text;
-  private boolean multipleAnswer;
+  private Boolean multipleAnswer;
+  private Double score;
   @Size(min = 1,max = 5, message = "The question is allowed to have at least 1 and at most 5 answers")
   private List<AnswerDto> answers = new ArrayList<>();
 

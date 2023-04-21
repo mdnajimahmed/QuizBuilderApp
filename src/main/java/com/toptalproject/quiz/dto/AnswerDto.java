@@ -11,5 +11,6 @@ public class AnswerDto {
   private UUID id;
   @NotEmpty(message = "Answer text can not be empty")
   private String text;
-  private boolean correct;
+  private Boolean correct;
+  private Boolean selected;
 }

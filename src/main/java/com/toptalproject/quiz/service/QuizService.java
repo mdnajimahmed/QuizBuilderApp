@@ -36,8 +36,6 @@ public interface QuizService {
   @Transactional
   void deleteAnswer(UUID quizId, UUID questionId, UUID answerId);
 
-  List<QuizDto> getQuizzes();
-
   QuizDto getQuizById(UUID id);
 
   Page<QuizDto> getQuiz(int page, int limit);

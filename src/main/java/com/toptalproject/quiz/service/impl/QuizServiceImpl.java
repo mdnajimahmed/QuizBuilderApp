@@ -33,8 +33,8 @@ class QuizServiceImpl implements QuizService {
   public QuizDto createQuiz(QuizDto request) {
     Quiz quiz = new Quiz();
     quiz.setTitle(request.getTitle());
-    quiz.setPublished(request.isPublished());
-    if (request.isPublished()) {
+    quiz.setPublished(request.getPublished());
+    if (request.getPublished()) {
       quiz.setPublishedAt(LocalDateTime.now());
     }
     request.getQuestions().forEach(q -> quiz.addQuestion(mapToQuestion(q)));
@@ -69,7 +69,7 @@ class QuizServiceImpl implements QuizService {
   public void updateQuestion(UUID quizId, UUID questionId, QuestionDto request) {
     Question question = selectQuestionForUpdate(quizId, questionId);
     question.setText(request.getText());
-    question.setMultipleAnswer(request.isMultipleAnswer());
+    question.setMultipleAnswer(request.getMultipleAnswer());
     validateQuestion(question);
   }
 
@@ -96,7 +96,7 @@ class QuizServiceImpl implements QuizService {
   public void updateAnswerToQuestion(UUID quizId, UUID questionId, UUID answerId,
                                      AnswerDto request) {
     Answer answer = selectAnswerForUpdate(quizId, questionId, answerId);
-    answer.setCorrect(request.isCorrect());
+    answer.setCorrect(request.getCorrect());
     answer.setText(request.getText());
     validateQuestion(answer.getQuestion());
   }
@@ -110,11 +110,6 @@ class QuizServiceImpl implements QuizService {
     Question question = answer.getQuestion();
     answer.getQuestion().removeAnswer(answer);
     validateQuestion(question);
-  }
-
-  @Override
-  public List<QuizDto> getQuizzes() {
-    return null;
   }
 
   @Override
@@ -133,7 +128,7 @@ class QuizServiceImpl implements QuizService {
   private Question mapToQuestion(QuestionDto questionRequest) {
     Question question = new Question();
     question.setText(questionRequest.getText());
-    question.setMultipleAnswer(questionRequest.isMultipleAnswer());
+    question.setMultipleAnswer(questionRequest.getMultipleAnswer());
     questionRequest.getAnswers()
         .forEach(answerRequest -> question.addAnswer(mapToAnswer(answerRequest)));
     validateQuestion(question);
@@ -143,7 +138,7 @@ class QuizServiceImpl implements QuizService {
   private Answer mapToAnswer(AnswerDto answerRequest) {
     Answer answer = new Answer();
     answer.setText(answerRequest.getText());
-    answer.setCorrect(answerRequest.isCorrect());
+    answer.setCorrect(answerRequest.getCorrect());
     return answer;
   }
 

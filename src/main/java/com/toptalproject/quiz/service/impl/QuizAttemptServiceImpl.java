@@ -13,9 +13,14 @@ import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.service.QuizAttemptService;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +54,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     quizAttempt.setScore(quizScore);
     quizAttemptRepository.save(quizAttempt);
   }
+
+
 
   private void updateQuestionAttempt(QuizAttempt quizAttempt, QuizDto request) {
     request.getQuestions().forEach(questionAttemptRequest -> {
@@ -122,4 +129,49 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     }
     return -1;
   }
+
+  @Override
+  public Page<QuizDto> getAttempts(int page, int limit) {
+    PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+    return quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(),pageRequest)
+        .map(this::buildQuizAttempt);
+  }
+
+  private QuizDto buildQuizAttempt(QuizAttempt quizAttempt) {
+    return QuizDto.builder()
+        .id(quizAttempt.getQuiz().getId())
+        .published(quizAttempt.getQuiz().isPublished())
+        .publishedAt(quizAttempt.getQuiz().getPublishedAt())
+        .title(quizAttempt.getQuiz().getTitle())
+        .score(quizAttempt.getScore())
+        .attemptedBy(quizAttempt.getCreatedBy())
+        .questions(quizAttempt.getQuestionAttempts().stream().map(this::buildQuestionAttemptDto).toList())
+        .build();
+  }
+
+  private QuestionDto buildQuestionAttemptDto(QuestionAttempt questionAttempt) {
+    return QuestionDto.builder()
+        .id(questionAttempt.getQuestion().getId())
+        .text(questionAttempt.getQuestion().getText())
+        .multipleAnswer(questionAttempt.getQuestion().isMultipleAnswer())
+        .score(questionAttempt.getScore())
+        .answers(buildAnswerDto(questionAttempt.getQuestion().getAnswers(),questionAttempt.getSelectedAnswerIds()))
+        .build();
+  }
+
+  private List<AnswerDto> buildAnswerDto(List<Answer> answers, String selectedAnswerIds) {
+    Map<String, Boolean> selected = Arrays.stream(selectedAnswerIds.split(",")).collect(
+        Collectors.toMap(s -> s, s -> true));
+    return answers.stream().map(
+        answer -> buildAnswerDto(answer,selected.getOrDefault(answer.getId(),false))).toList();
+  }
+
+  private AnswerDto buildAnswerDto(Answer answer,boolean isSelected) {
+    return AnswerDto.builder()
+        .text(answer.getText())
+        .id(answer.getId())
+        .selected(isSelected)
+        .build();
+  }
+
 }

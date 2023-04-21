@@ -19,8 +19,10 @@ public class QuizDto {
   private UUID id;
   @NotEmpty(message = "quiz title can not be empty")
   private String title;
-  private boolean published;
+  private Boolean published;
   private LocalDateTime publishedAt;
-  @Size(min = 1,max = 10, message = "The quiz is allowed to have at least 1 and at most 10 questions")
+  private Double score;
+  private String attemptedBy;
+  @Size(min = 1, max = 10, message = "The quiz is allowed to have at least 1 and at most 10 questions")
   List<QuestionDto> questions = new ArrayList<>();
 }
