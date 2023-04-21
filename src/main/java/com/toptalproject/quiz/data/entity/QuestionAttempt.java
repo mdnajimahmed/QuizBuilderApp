@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,20 +15,18 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "questions")
+@Table(name = "question_attempts")
 @NoArgsConstructor
 @Getter
 @Setter
-public class Question extends BaseEntity {
-  private String text;
-  private boolean isMultipleAnswer;
+public class QuestionAttempt extends BaseEntity {
+  private double score;
+  private boolean skipped;
+  private String selectedAnswerIds;
   @ManyToOne
-  @JoinColumn(name="quiz_id", nullable=false)
-  private Quiz quiz;
-  @OneToMany(mappedBy = "question",fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
-  private List<Answer> answers = new ArrayList<>();
-  public void addAnswer(Answer answer){
-    this.answers.add(answer);
-    answer.setQuestion(this);
-  }
+  @JoinColumn(name="quiz_attempt_id", nullable=false)
+  private QuizAttempt quizAttempt;
+  @OneToOne
+  @JoinColumn(name = "question_id", referencedColumnName = "id")
+  private Question question;
 }

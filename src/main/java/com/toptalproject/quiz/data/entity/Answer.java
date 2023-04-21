@@ -16,7 +16,6 @@ import lombok.Setter;
 @Setter
 public class Answer extends BaseEntity {
   private String text;
-  private double weight;
   private boolean isCorrect;
   @ManyToOne
   @JoinColumn(name="question_id", nullable=false)

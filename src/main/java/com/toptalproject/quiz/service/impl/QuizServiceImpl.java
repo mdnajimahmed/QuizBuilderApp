@@ -1,5 +1,8 @@
 package com.toptalproject.quiz.service.impl;
 
+import com.toptalproject.quiz.data.entity.Answer;
+import com.toptalproject.quiz.data.entity.Question;
+import com.toptalproject.quiz.dto.request.AnswerRequest;
 import com.toptalproject.quiz.dto.request.QuestionRequest;
 import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.data.entity.Quiz;
@@ -22,7 +25,24 @@ class QuizServiceImpl implements QuizService {
   public void createQuiz(QuizRequest request) {
     Quiz quiz = new Quiz();
     quiz.setTitle(request.getTitle());
+    quiz.setIsPublished(request.isPublished());
+    request.getQuestions().forEach(q -> quiz.addQuestion(mapToQuestion(q)));
     quizRepository.save(quiz);
+  }
+
+  private Question mapToQuestion(QuestionRequest questionRequest) {
+    Question question = new Question();
+    question.setText(questionRequest.getText());
+    question.setMultipleAnswer(questionRequest.isMultipleAnswer());
+    questionRequest.getAnswers()
+        .forEach(answerRequest -> question.addAnswer(mapToAnswer(answerRequest)));
+    return question;
+  }
+  private Answer mapToAnswer(AnswerRequest answerRequest) {
+    Answer answer = new Answer();
+    answer.setText(answerRequest.getText());
+    answer.setCorrect(answerRequest.isCorrect());
+    return answer;
   }
 
   @Override
