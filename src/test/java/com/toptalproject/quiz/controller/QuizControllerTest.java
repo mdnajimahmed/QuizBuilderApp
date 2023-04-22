@@ -2,14 +2,12 @@ package com.toptalproject.quiz.controller;
 
 import com.toptalproject.quiz.PostgresqlContainer;
 import com.toptalproject.quiz.TokenService;
-import com.toptalproject.quiz.dto.AnswerDto;
+import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.dto.QuizPage;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,9 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,7 +41,7 @@ class QuizControllerTest {
   QuizDto quizAttempt;
   QuestionDto newQuestion;
 
-  AnswerDto newAnswerUnderNewQuestion;
+  OptionDto newOptionUnderNewQuestion;
 
   @BeforeAll
   void setup() throws Exception {
@@ -59,9 +54,9 @@ class QuizControllerTest {
   void runApiAutomationTestFlow() {
     createQuiz();
     addQuestion();
-    addAnswer();
-    updateAnswer();
-    deleteAnswer();
+    addOption();
+    updateOption();
+    deleteOption();
     updateQuestion();
     deleteQuestion();
     updateQuiz();
@@ -108,20 +103,20 @@ class QuizControllerTest {
         .questions(Arrays.asList(
             QuestionDto.builder().
                 id(quiz.getQuestions().get(0).getId())
-                .answers(
+                .options(
                     Arrays.asList(
-                        AnswerDto.builder()
-                            .id(quiz.getQuestions().get(0).getAnswers().get(0).getId())
+                        OptionDto.builder()
+                            .id(quiz.getQuestions().get(0).getOptions().get(0).getId())
                             .build())).build(),
             QuestionDto.builder().id(quiz.getQuestions().get(1).getId())
-                .answers(
+                .options(
                     Arrays.asList(
-                        AnswerDto.builder()
-                            .id(quiz.getQuestions().get(1).getAnswers().get(0).getId()).build(),
-                        AnswerDto.builder()
-                            .id(quiz.getQuestions().get(1).getAnswers().get(1).getId()).build(),
-                        AnswerDto.builder()
-                            .id(quiz.getQuestions().get(1).getAnswers().get(2).getId()).build()
+                        OptionDto.builder()
+                            .id(quiz.getQuestions().get(1).getOptions().get(0).getId()).build(),
+                        OptionDto.builder()
+                            .id(quiz.getQuestions().get(1).getOptions().get(1).getId()).build(),
+                        OptionDto.builder()
+                            .id(quiz.getQuestions().get(1).getOptions().get(2).getId()).build()
                     )).build()
 
         )).build();
@@ -180,61 +175,61 @@ class QuizControllerTest {
     Assertions.assertEquals(title, newQuestion.getText());
   }
 
-  private void deleteAnswer() {
+  private void deleteOption() {
     quiz = sendRequest(null, quizAuthorToken,
-        String.format("quizzes/%s/questions/%s/answers/%s", quiz.getId(), newQuestion.getId(),
-            newAnswerUnderNewQuestion.getId()), QuizDto.class, HttpMethod.DELETE);
+        String.format("quizzes/%s/questions/%s/options/%s", quiz.getId(), newQuestion.getId(),
+            newOptionUnderNewQuestion.getId()), QuizDto.class, HttpMethod.DELETE);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(2, newQuestion.getAnswers().size());
-    newAnswerUnderNewQuestion = newQuestion.getAnswers().stream()
-        .filter(a -> newAnswerUnderNewQuestion.getId().equals(a.getId())).findAny().orElse(null);
-    Assertions.assertNull(newAnswerUnderNewQuestion);
+    Assertions.assertEquals(2, newQuestion.getOptions().size());
+    newOptionUnderNewQuestion = newQuestion.getOptions().stream()
+        .filter(a -> newOptionUnderNewQuestion.getId().equals(a.getId())).findAny().orElse(null);
+    Assertions.assertNull(newOptionUnderNewQuestion);
   }
 
-  private void updateAnswer() {
+  private void updateOption() {
     String questionText = "California";
-    AnswerDto answerDto = AnswerDto.builder().text(questionText).correct(false).build();
+    OptionDto optionDto = OptionDto.builder().text(questionText).correct(false).build();
 
-    quiz = sendRequest(answerDto, quizAuthorToken,
-        String.format("quizzes/%s/questions/%s/answers/%s", quiz.getId(), newQuestion.getId(),
-            newAnswerUnderNewQuestion.getId()), QuizDto.class, HttpMethod.PUT);
+    quiz = sendRequest(optionDto, quizAuthorToken,
+        String.format("quizzes/%s/questions/%s/options/%s", quiz.getId(), newQuestion.getId(),
+            newOptionUnderNewQuestion.getId()), QuizDto.class, HttpMethod.PUT);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(3, newQuestion.getAnswers().size());
-    newAnswerUnderNewQuestion =
-        newQuestion.getAnswers().stream().filter(a -> questionText.equals(a.getText())).findAny()
+    Assertions.assertEquals(3, newQuestion.getOptions().size());
+    newOptionUnderNewQuestion =
+        newQuestion.getOptions().stream().filter(a -> questionText.equals(a.getText())).findAny()
             .orElse(null);
-    Assertions.assertNotNull(newAnswerUnderNewQuestion);
+    Assertions.assertNotNull(newOptionUnderNewQuestion);
   }
 
-  private void addAnswer() {
+  private void addOption() {
     String questionText = "Kalifornia";
-    AnswerDto answerDto = AnswerDto.builder().text(questionText).correct(false).build();
+    OptionDto optionDto = OptionDto.builder().text(questionText).correct(false).build();
 
-    quiz = sendRequest(answerDto, quizAuthorToken,
-        String.format("quizzes/%s/questions/%s/answers", quiz.getId(), newQuestion.getId()),
+    quiz = sendRequest(optionDto, quizAuthorToken,
+        String.format("quizzes/%s/questions/%s/options", quiz.getId(), newQuestion.getId()),
         QuizDto.class, HttpMethod.POST);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(3, newQuestion.getAnswers().size());
-    newAnswerUnderNewQuestion =
-        newQuestion.getAnswers().stream().filter(a -> questionText.equals(a.getText())).findAny()
+    Assertions.assertEquals(3, newQuestion.getOptions().size());
+    newOptionUnderNewQuestion =
+        newQuestion.getOptions().stream().filter(a -> questionText.equals(a.getText())).findAny()
             .orElse(null);
-    Assertions.assertNotNull(newAnswerUnderNewQuestion);
+    Assertions.assertNotNull(newOptionUnderNewQuestion);
   }
 
   private void addQuestion() {
     String title = "Which is the largest state in the United States of America";
-    QuestionDto questionDto = QuestionDto.builder().text(title).multipleAnswer(false).answers(
-        Arrays.asList(AnswerDto.builder().text("Texas").correct(false).build(),
-            AnswerDto.builder().text("Alaska").correct(true).build())).build();
+    QuestionDto questionDto = QuestionDto.builder().text(title).multipleAnswer(false).options(
+        Arrays.asList(OptionDto.builder().text("Texas").correct(false).build(),
+            OptionDto.builder().text("Alaska").correct(true).build())).build();
     quiz = sendRequest(questionDto, quizAuthorToken,
         String.format("quizzes/%s/questions", quiz.getId()), QuizDto.class, HttpMethod.POST);
     newQuestion =
@@ -245,16 +240,16 @@ class QuizControllerTest {
 
   private void createQuiz() {
     QuizDto dto = QuizDto.builder().title("My first quiz").published(false).questions(Arrays.asList(
-        QuestionDto.builder().text("Moon is a star").multipleAnswer(false).answers(
-            Arrays.asList(AnswerDto.builder().text("Yes").correct(false).build(),
-                AnswerDto.builder().text("No").correct(true).build())).build(),
-        QuestionDto.builder().text("Temperature can be measured in").multipleAnswer(true).answers(
+        QuestionDto.builder().text("Moon is a star").multipleAnswer(false).options(
+            Arrays.asList(OptionDto.builder().text("Yes").correct(false).build(),
+                OptionDto.builder().text("No").correct(true).build())).build(),
+        QuestionDto.builder().text("Temperature can be measured in").multipleAnswer(true).options(
             Arrays.asList(
-                AnswerDto.builder().text("Kelvin").correct(true).build(),
-                AnswerDto.builder().text("Fahrenheit").correct(true).build(),
-                AnswerDto.builder().text("Gram").correct(false).build(),
-                AnswerDto.builder().text("Celsius").correct(true).build(),
-                AnswerDto.builder().text("Liters").correct(false).build()
+                OptionDto.builder().text("Kelvin").correct(true).build(),
+                OptionDto.builder().text("Fahrenheit").correct(true).build(),
+                OptionDto.builder().text("Gram").correct(false).build(),
+                OptionDto.builder().text("Celsius").correct(true).build(),
+                OptionDto.builder().text("Liters").correct(false).build()
             )).build()
 
     )).build();

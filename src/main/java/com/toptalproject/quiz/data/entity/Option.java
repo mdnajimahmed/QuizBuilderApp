@@ -4,17 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "answers")
+@Table(name = "options")
 @NoArgsConstructor
 @Getter
 @Setter
-public class Answer extends BaseEntity {
+public class Option extends BaseEntity {
   private String text;
   private boolean isCorrect;
   @ManyToOne

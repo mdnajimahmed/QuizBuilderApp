@@ -26,15 +26,15 @@ public class Question extends BaseEntity {
   private Quiz quiz;
   @OneToMany(mappedBy = "question", fetch = FetchType.EAGER,
       cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-  private List<Answer> answers = new ArrayList<>();
+  private List<Option> options = new ArrayList<>();
 
-  public void addAnswer(Answer answer) {
-    this.answers.add(answer);
-    answer.setQuestion(this);
+  public void addOption(Option option) {
+    this.options.add(option);
+    option.setQuestion(this);
   }
 
-  public void removeAnswer(Answer answer) {
-    this.answers.remove(answer);
-    answer.setQuestion(null);
+  public void removeOption(Option option) {
+    this.options.remove(option);
+    option.setQuestion(null);
   }
 }

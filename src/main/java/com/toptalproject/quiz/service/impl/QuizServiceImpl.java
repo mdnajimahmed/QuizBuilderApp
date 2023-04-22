@@ -1,11 +1,11 @@
 package com.toptalproject.quiz.service.impl;
 
-import com.toptalproject.quiz.data.entity.Answer;
+import com.toptalproject.quiz.data.entity.Option;
 import com.toptalproject.quiz.data.entity.Question;
 import com.toptalproject.quiz.data.entity.Quiz;
-import com.toptalproject.quiz.data.repository.AnswerRepository;
+import com.toptalproject.quiz.data.repository.OptionRepository;
 import com.toptalproject.quiz.data.repository.QuestionRepository;
-import com.toptalproject.quiz.dto.AnswerDto;
+import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizPage;
 import com.toptalproject.quiz.error.BadRequestException;
@@ -25,14 +25,14 @@ import org.springframework.stereotype.Service;
 class QuizServiceImpl implements QuizService {
   private final QuizRepository quizRepository;
   private final QuestionRepository questionRepository;
-  private final AnswerRepository answerRepository;
+  private final OptionRepository optionRepository;
   private final AuditorAware<String> principal;
 
   QuizServiceImpl(QuizRepository quizRepository, QuestionRepository questionRepository,
-                  AnswerRepository answerRepository, AuditorAware<String> principal) {
+                  OptionRepository optionRepository, AuditorAware<String> principal) {
     this.quizRepository = quizRepository;
     this.questionRepository = questionRepository;
-    this.answerRepository = answerRepository;
+    this.optionRepository = optionRepository;
     this.principal = principal;
   }
 
@@ -98,36 +98,36 @@ class QuizServiceImpl implements QuizService {
   }
 
   @Override
-  public QuizDto addAnswerToQuestion(UUID quizId, UUID questionId, AnswerDto request) {
+  public QuizDto addOptionToQuestion(UUID quizId, UUID questionId, OptionDto request) {
     Question question = selectQuestionForUpdate(quizId, questionId);
-    if (question.getAnswers().size() > 5) {
-      throw new BadRequestException("The question already has a maximum number of 5 answers");
+    if (question.getOptions().size() > 5) {
+      throw new BadRequestException("The question already has a maximum number of 5 options");
     }
-    Answer answer = mapToAnswer(request);
-    question.addAnswer(answer);
+    Option option = mapToOption(request);
+    question.addOption(option);
     validateQuestion(question);
-    answerRepository.save(answer);
+    optionRepository.save(option);
     return buildQuizDto(question.getQuiz());
   }
 
   @Override
-  public QuizDto updateAnswerToQuestion(UUID quizId, UUID questionId, UUID answerId,
-                                        AnswerDto request) {
-    Answer answer = selectAnswerForUpdate(quizId, questionId, answerId);
-    answer.setCorrect(request.getCorrect());
-    answer.setText(request.getText());
-    validateQuestion(answer.getQuestion());
-    return buildQuizDto(answer.getQuestion().getQuiz());
+  public QuizDto updateOption(UUID quizId, UUID questionId, UUID optionId,
+                              OptionDto request) {
+    Option option = selectOptionForUpdate(quizId, questionId, optionId);
+    option.setCorrect(request.getCorrect());
+    option.setText(request.getText());
+    validateQuestion(option.getQuestion());
+    return buildQuizDto(option.getQuestion().getQuiz());
   }
 
   @Override
-  public QuizDto deleteAnswer(UUID quizId, UUID questionId, UUID answerId) {
-    Answer answer = selectAnswerForUpdate(quizId, questionId, answerId);
-    if (answer.getQuestion().getAnswers().size() < 3) {
+  public QuizDto deleteOption(UUID quizId, UUID questionId, UUID optionId) {
+    Option option = selectOptionForUpdate(quizId, questionId, optionId);
+    if (option.getQuestion().getOptions().size() < 3) {
       throw new BadRequestException("Question should have at least 2 answers");
     }
-    Question question = answer.getQuestion();
-    answer.getQuestion().removeAnswer(answer);
+    Question question = option.getQuestion();
+    option.getQuestion().removeOption(option);
     validateQuestion(question);
     return buildQuizDto(question.getQuiz());
   }
@@ -156,21 +156,21 @@ class QuizServiceImpl implements QuizService {
     Question question = new Question();
     question.setText(questionRequest.getText());
     question.setMultipleAnswer(questionRequest.getMultipleAnswer());
-    questionRequest.getAnswers()
-        .forEach(answerRequest -> question.addAnswer(mapToAnswer(answerRequest)));
+    questionRequest.getOptions()
+        .forEach(selectedOption -> question.addOption(mapToOption(selectedOption)));
     validateQuestion(question);
     return question;
   }
 
-  private Answer mapToAnswer(AnswerDto answerRequest) {
-    Answer answer = new Answer();
-    answer.setText(answerRequest.getText());
-    answer.setCorrect(answerRequest.getCorrect());
-    return answer;
+  private Option mapToOption(OptionDto optionDto) {
+    Option option = new Option();
+    option.setText(optionDto.getText());
+    option.setCorrect(optionDto.getCorrect());
+    return option;
   }
 
   private void validateQuestion(Question question) {
-    long correctAnsCount = question.getAnswers().stream().filter(Answer::isCorrect).count();
+    long correctAnsCount = question.getOptions().stream().filter(Option::isCorrect).count();
     if (correctAnsCount == 0) {
       throw new BadRequestException("No correct answer provided for the question");
     }
@@ -198,15 +198,15 @@ class QuizServiceImpl implements QuizService {
         .id(question.getId())
         .text(question.getText())
         .multipleAnswer(question.isMultipleAnswer())
-        .answers(question.getAnswers().stream().map(this::buildAnswerDto).toList())
+        .options(question.getOptions().stream().map(this::buildOptionDto).toList())
         .build();
   }
 
-  private AnswerDto buildAnswerDto(Answer answer) {
-    return AnswerDto.builder()
-        .correct(answer.isCorrect())
-        .text(answer.getText())
-        .id(answer.getId())
+  private OptionDto buildOptionDto(Option option) {
+    return OptionDto.builder()
+        .correct(option.isCorrect())
+        .text(option.getText())
+        .id(option.getId())
         .build();
   }
 
@@ -232,11 +232,11 @@ class QuizServiceImpl implements QuizService {
     return question;
   }
 
-  private Answer selectAnswerForUpdate(UUID quizId, UUID questionId, UUID answerId) {
+  private Option selectOptionForUpdate(UUID quizId, UUID questionId, UUID optionId) {
     Question question = selectQuestionForUpdate(quizId, questionId);
-    Answer answer = question.getAnswers().stream().filter(a -> a.getId().equals(answerId)).findAny()
-        .orElseThrow(() -> new NotFoundException(Answer.class.getCanonicalName(), answerId));
-    return answer;
+    Option option = question.getOptions().stream().filter(a -> a.getId().equals(optionId)).findAny()
+        .orElseThrow(() -> new NotFoundException(Option.class.getCanonicalName(), optionId));
+    return option;
   }
 
 }

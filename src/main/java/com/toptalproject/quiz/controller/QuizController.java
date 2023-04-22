@@ -1,6 +1,6 @@
 package com.toptalproject.quiz.controller;
 
-import com.toptalproject.quiz.dto.AnswerDto;
+import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.dto.QuizPage;
@@ -8,9 +8,7 @@ import com.toptalproject.quiz.service.QuizService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import java.util.List;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,36 +71,36 @@ public class QuizController {
 
   @PutMapping("/{id}/questions/{questionId}")
   public QuizDto updateQuestion(@PathVariable("id") UUID quizId,
-                             @PathVariable("questionId") UUID questionId,
-                             @RequestBody QuestionDto request) {
+                                @PathVariable("questionId") UUID questionId,
+                                @RequestBody QuestionDto request) {
     return quizService.updateQuestion(quizId, questionId, request);
   }
 
   @DeleteMapping("/{id}/questions/{questionId}")
   public QuizDto deleteQuestion(@PathVariable("id") UUID quizId,
-                             @PathVariable("questionId") UUID questionId) {
+                                @PathVariable("questionId") UUID questionId) {
     return quizService.deleteQuestion(quizId, questionId);
   }
 
-  @PostMapping("/{id}/questions/{questionId}/answers")
-  public QuizDto addAnswer(@PathVariable("id") UUID quizId,
-                        @PathVariable("questionId") UUID questionId,
-                        @RequestBody AnswerDto request) {
-    return quizService.addAnswerToQuestion(quizId, questionId, request);
+  @PostMapping("/{id}/questions/{questionId}/options")
+  public QuizDto addOption(@PathVariable("id") UUID quizId,
+                           @PathVariable("questionId") UUID questionId,
+                           @RequestBody OptionDto request) {
+    return quizService.addOptionToQuestion(quizId, questionId, request);
   }
 
-  @PutMapping("/{id}/questions/{questionId}/answers/{answerId}")
-  public QuizDto updateAnswer(@PathVariable("id") UUID quizId,
-                           @PathVariable("questionId") UUID questionId,
-                           @PathVariable("answerId") UUID answerId,
-                           @RequestBody AnswerDto request) {
-    return quizService.updateAnswerToQuestion(quizId, questionId, answerId, request);
+  @PutMapping("/{id}/questions/{questionId}/options/{optionId}")
+  public QuizDto updateOption(@PathVariable("id") UUID quizId,
+                              @PathVariable("questionId") UUID questionId,
+                              @PathVariable("optionId") UUID optionId,
+                              @RequestBody OptionDto request) {
+    return quizService.updateOption(quizId, questionId, optionId, request);
   }
 
-  @DeleteMapping("/{id}/questions/{questionId}/answers/{answerId}")
-  public QuizDto deleteAnswer(@PathVariable("id") UUID quizId,
-                           @PathVariable("questionId") UUID questionId,
-                           @PathVariable("answerId") UUID answerId) {
-    return quizService.deleteAnswer(quizId, questionId, answerId);
+  @DeleteMapping("/{id}/questions/{questionId}/options/{optionId}")
+  public QuizDto deleteOption(@PathVariable("id") UUID quizId,
+                              @PathVariable("questionId") UUID questionId,
+                              @PathVariable("optionId") UUID optionId) {
+    return quizService.deleteOption(quizId, questionId, optionId);
   }
 }

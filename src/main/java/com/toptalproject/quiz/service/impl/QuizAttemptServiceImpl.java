@@ -1,13 +1,13 @@
 package com.toptalproject.quiz.service.impl;
 
-import com.toptalproject.quiz.data.entity.Answer;
+import com.toptalproject.quiz.data.entity.Option;
 import com.toptalproject.quiz.data.entity.Question;
 import com.toptalproject.quiz.data.entity.QuestionAttempt;
 import com.toptalproject.quiz.data.entity.Quiz;
 import com.toptalproject.quiz.data.entity.QuizAttempt;
 import com.toptalproject.quiz.data.repository.QuizAttemptRepository;
 import com.toptalproject.quiz.data.repository.QuizRepository;
-import com.toptalproject.quiz.dto.AnswerDto;
+import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.dto.QuizPage;
@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 class QuizAttemptServiceImpl implements QuizAttemptService {
   private final QuizRepository quizRepository;
   private final QuizAttemptRepository quizAttemptRepository;
-
   private final AuditorAware<String> principal;
 
   QuizAttemptServiceImpl(QuizRepository quizRepository, QuizAttemptRepository quizAttemptRepository,
@@ -70,18 +69,18 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
           .orElseThrow(() -> new NotFoundException(
               Question.class.getCanonicalName(), questionAttemptRequest.getId()
           ));
-      if (!question.isMultipleAnswer() && questionAttemptRequest.getAnswers().size() > 1) {
+      if (!question.isMultipleAnswer() && questionAttemptRequest.getOptions().size() > 1) {
         throw new BadRequestException("Multiple answer not allowed in a single answer question");
       }
-      String selectedIds = questionAttemptRequest.getAnswers().stream()
-          .map(answerAttemptRequest -> answerAttemptRequest.getId().toString())
+      String selectedIds = questionAttemptRequest.getOptions().stream()
+          .map(selectedOption -> selectedOption.getId().toString())
           .collect(Collectors.joining(","));
       QuestionAttempt questionAttempt = new QuestionAttempt();
-      questionAttempt.setSkipped(questionAttemptRequest.getAnswers().isEmpty());
+      questionAttempt.setSkipped(questionAttemptRequest.getOptions().isEmpty());
       questionAttempt.setQuestion(question);
       questionAttempt.setScore(
           calculateQuestionScore(question, questionAttemptRequest));
-      questionAttempt.setSelectedAnswerIds(selectedIds);
+      questionAttempt.setSelectedOptionIds(selectedIds);
       quizAttempt.addQuestionAttempt(questionAttempt);
     });
   }
@@ -90,29 +89,29 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   private double calculateQuestionScore(Question question,
                                         QuestionDto questionAttemptRequest) {
     if (question.isMultipleAnswer()) {
-      return calculateMultipleAnswerQuestionScore(question.getAnswers(),
-          questionAttemptRequest.getAnswers());
+      return calculateMultipleAnswerQuestionScore(question.getOptions(),
+          questionAttemptRequest.getOptions());
     }
-    return calculateSingleAnswerQuestionScore(question.getAnswers(),
-        questionAttemptRequest.getAnswers());
+    return calculateSingleAnswerQuestionScore(question.getOptions(),
+        questionAttemptRequest.getOptions());
   }
 
-  private double calculateMultipleAnswerQuestionScore(List<Answer> answers,
-                                                      List<AnswerDto> answerAttempts) {
-    if (answerAttempts.size() == 0) {
+  private double calculateMultipleAnswerQuestionScore(List<Option> options,
+                                                      List<OptionDto> selectedOptions) {
+    if (selectedOptions.size() == 0) {
       return 0;
     }
-    if (answerAttempts.size() == 1) {
+    if (selectedOptions.size() == 1) {
       throw new BadRequestException("Expected more than one answer for multiple answer question");
     }
-    double correct = answers.stream().filter(Answer::isCorrect).count();
-    double incorrect = answers.size() - correct;
+    double correct = options.stream().filter(Option::isCorrect).count();
+    double incorrect = options.size() - correct;
     double score = 0;
-    for (Answer answer : answers) {
-      boolean isSelected = answerAttempts.stream().filter(answerAttemptRequest ->
-          answerAttemptRequest.getId().equals(answer.getId())).count() == 1;
+    for (Option option : options) {
+      boolean isSelected = selectedOptions.stream().filter(selectedOption ->
+          selectedOption.getId().equals(option.getId())).count() == 1;
       if (isSelected) {
-        if (answer.isCorrect()) {
+        if (option.isCorrect()) {
           score += 1 / correct;
         } else {
           score -= 1 / incorrect; // if incorrect is 0 , is correct is always true.
@@ -122,18 +121,18 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     return score;
   }
 
-  private double calculateSingleAnswerQuestionScore(List<Answer> answers,
-                                                    List<AnswerDto> answerAttempts) {
-    if (answerAttempts.isEmpty()) {
+  private double calculateSingleAnswerQuestionScore(List<Option> options,
+                                                    List<OptionDto> selectedOptions) {
+    if (selectedOptions.isEmpty()) {
       return 0;
     }
-    if (answerAttempts.size() > 1) {
+    if (selectedOptions.size() > 1) {
       throw new BadRequestException("Expected at most one answer for single answer question");
     }
-    Answer correctAnswer = answers.stream().filter(Answer::isCorrect).findAny()
+    Option correctOption = options.stream().filter(Option::isCorrect).findAny()
         .orElseThrow(RuntimeException::new);
-    AnswerDto attemptedAnswer = answerAttempts.get(0);
-    if (correctAnswer.getId().equals(attemptedAnswer.getId())) {
+    OptionDto selectedOption = selectedOptions.get(0);
+    if (correctOption.getId().equals(selectedOption.getId())) {
       return 1;
     }
     return -1;
@@ -192,33 +191,33 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     if (questionAttempt == null) {
       return
           questionDtoBuilder.score(0.0)
-              .answers(buildAnswersDto(question.getAnswers()))
+              .options(buildOptionsDto(question.getOptions()))
               .build();
     } else {
       questionDtoBuilder
           .score(questionAttempt.getScore())
-          .answers(buildAnswersDto(question.getAnswers(), questionAttempt.getSelectedAnswerIds()))
+          .options(buildOptionsDto(question.getOptions(), questionAttempt.getSelectedOptionIds()))
           .build();
     }
     return questionDtoBuilder.build();
   }
 
-  private List<AnswerDto> buildAnswersDto(List<Answer> answers) {
-    return answers.stream().map(answer -> buildAnswerDto(answer, false)).toList();
+  private List<OptionDto> buildOptionsDto(List<Option> options) {
+    return options.stream().map(option -> buildOptionDto(option, false)).toList();
   }
 
-  private List<AnswerDto> buildAnswersDto(List<Answer> answers, String selectedAnswerIds) {
-    Map<String, Boolean> selected = Arrays.stream(selectedAnswerIds.split(",")).collect(
+  private List<OptionDto> buildOptionsDto(List<Option> options, String selectedOptionIds) {
+    Map<String, Boolean> selected = Arrays.stream(selectedOptionIds.split(",")).collect(
         Collectors.toMap(s -> s, s -> true));
-    return answers.stream().map(
-        answer -> buildAnswerDto(answer, selected.getOrDefault(
-            answer.getId().toString(), false))).toList();
+    return options.stream().map(
+        option -> buildOptionDto(option, selected.getOrDefault(
+            option.getId().toString(), false))).toList();
   }
 
-  private AnswerDto buildAnswerDto(Answer answer, boolean isSelected) {
-    return AnswerDto.builder()
-        .text(answer.getText())
-        .id(answer.getId())
+  private OptionDto buildOptionDto(Option option, boolean isSelected) {
+    return OptionDto.builder()
+        .text(option.getText())
+        .id(option.getId())
         .selected(isSelected)
         .build();
   }

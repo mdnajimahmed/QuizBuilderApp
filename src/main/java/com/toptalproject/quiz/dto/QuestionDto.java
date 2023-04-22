@@ -16,7 +16,7 @@ public class QuestionDto {
   private String text;
   private Boolean multipleAnswer;
   private Double score;
-  @Size(min = 1,max = 5, message = "The question is allowed to have at least 1 and at most 5 answers")
-  private List<AnswerDto> answers = new ArrayList<>();
+  @Size(min = 1,max = 5, message = "The question is allowed to have at least 1 and at most 5 options")
+  private List<OptionDto> options = new ArrayList<>();
 
 }

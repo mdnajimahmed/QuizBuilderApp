@@ -7,9 +7,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class AnswerDto {
+public class OptionDto {
   private UUID id;
-  @NotEmpty(message = "Answer text can not be empty")
+  @NotEmpty(message = "Option text can not be empty")
   private String text;
   private Boolean correct;
   private Boolean selected;
