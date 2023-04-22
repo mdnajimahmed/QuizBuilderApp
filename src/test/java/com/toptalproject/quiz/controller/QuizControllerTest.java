@@ -5,8 +5,11 @@ import com.toptalproject.quiz.TokenService;
 import com.toptalproject.quiz.dto.AnswerDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import com.toptalproject.quiz.dto.QuizPage;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,7 +42,6 @@ class QuizControllerTest {
   private TokenService tokenService;
   private String quizAuthorToken;
   private String quizTaker1;
-  private String quizTaker2;
   QuizDto quiz;
   QuizDto quizAttempt;
   QuestionDto newQuestion;
@@ -47,7 +52,6 @@ class QuizControllerTest {
   void setup() throws Exception {
     quizAuthorToken = tokenService.getToken("quizCreatorUser@toptalQuizApp.com", "aA.123456789");
     quizTaker1 = tokenService.getToken("quizTaker01@toptalQuizApp.com", "aA.123456789");
-    quizTaker2 = tokenService.getToken("quizTaker02@toptalQuizApp.com", "aA.123456789");
   }
 
 
@@ -62,15 +66,43 @@ class QuizControllerTest {
     deleteQuestion();
     updateQuiz();
     publishQuestion();
-    attemptQuiz1();
-//    attemptQuiz2(quizTaker2);
-//    loadQuizCreateByMe();
-//    loadQuizStat();
-//    loadQuizzesTakenBy(quizTaker1);
-//    loadQuizzesTakenBy(quizTaker2);
+    attemptQuiz();
+    loadQuizCreatedByMe();
+    loadQuizStat();
+    loadQuizzesTakenByQuizTaker();
   }
 
-  private void attemptQuiz1() {
+  private void loadQuizzesTakenByQuizTaker() {
+    QuizPage page = sendRequest(null, quizTaker1,
+        String.format("attempts?page=0&limit=50", quiz.getId()), QuizPage.class,
+        HttpMethod.GET);
+    Assertions.assertEquals(1, page.getQuizzes().size());
+    QuizDto myStat = page.getQuizzes().get(0);
+    Assertions.assertEquals(-0.8333333333333334, myStat.getScore(), 1e-6);
+    Assertions.assertEquals(-1.0, myStat.getQuestions().get(0).getScore(), 1e-6);
+    Assertions.assertEquals(0.16666666666666663, myStat.getQuestions().get(1).getScore(),
+        1e-6);
+  }
+
+  private void loadQuizStat() {
+    QuizPage page = sendRequest(null, quizAuthorToken,
+        String.format("/attempts/stat/%s?page=0&limit=50", quiz.getId()), QuizPage.class,
+        HttpMethod.GET);
+    Assertions.assertEquals(1, page.getQuizzes().size());
+    QuizDto stats = page.getQuizzes().get(0);
+    Assertions.assertEquals(-0.8333333333333334, stats.getScore(), 1e-6);
+    Assertions.assertEquals(-1.0, stats.getQuestions().get(0).getScore(), 1e-6);
+    Assertions.assertEquals(0.16666666666666663, stats.getQuestions().get(1).getScore(),
+        1e-6);
+  }
+
+  private void loadQuizCreatedByMe() {
+    QuizPage page = sendRequest(null, quizAuthorToken, "quizzes?page=0&limit=50", QuizPage.class,
+        HttpMethod.GET);
+    Assertions.assertEquals(1, page.getQuizzes().size());
+  }
+
+  private void attemptQuiz() {
     QuizDto dto = QuizDto.builder()
         .id(quiz.getId())
         .questions(Arrays.asList(
@@ -96,9 +128,10 @@ class QuizControllerTest {
 
     quizAttempt = sendRequest(dto, quizTaker1, "attempts",
         QuizDto.class, HttpMethod.POST);
-    Assertions.assertEquals(-0.8333333333333334, quizAttempt.getScore(),1e-6);
-    Assertions.assertEquals(-1.0, quizAttempt.getQuestions().get(0).getScore(),1e-6);
-    Assertions.assertEquals(0.16666666666666663, quizAttempt.getQuestions().get(1).getScore(),1e-6);
+    Assertions.assertEquals(-0.8333333333333334, quizAttempt.getScore(), 1e-6);
+    Assertions.assertEquals(-1.0, quizAttempt.getQuestions().get(0).getScore(), 1e-6);
+    Assertions.assertEquals(0.16666666666666663, quizAttempt.getQuestions().get(1).getScore(),
+        1e-6);
 
   }
 

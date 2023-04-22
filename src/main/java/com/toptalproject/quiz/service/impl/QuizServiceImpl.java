@@ -7,6 +7,7 @@ import com.toptalproject.quiz.data.repository.AnswerRepository;
 import com.toptalproject.quiz.data.repository.QuestionRepository;
 import com.toptalproject.quiz.dto.AnswerDto;
 import com.toptalproject.quiz.dto.QuestionDto;
+import com.toptalproject.quiz.dto.QuizPage;
 import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.data.repository.QuizRepository;
@@ -139,9 +140,10 @@ class QuizServiceImpl implements QuizService {
   }
 
   @Override
-  public Page<QuizDto> getQuiz(int page, int limit) {
-    PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-    return quizRepository.findAll(pageRequest).map(this::buildQuizDto);
+  public QuizPage getQuiz(int pageNo, int limit) {
+    PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
+    Page<QuizDto> currentPage = quizRepository.findAll(pageRequest).map(this::buildQuizDto);
+    return new QuizPage(currentPage.getContent(),pageNo,currentPage.getTotalPages(),limit);
   }
 
   @Override

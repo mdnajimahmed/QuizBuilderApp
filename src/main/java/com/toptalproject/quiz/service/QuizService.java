@@ -3,6 +3,7 @@ package com.toptalproject.quiz.service;
 import com.toptalproject.quiz.dto.AnswerDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import com.toptalproject.quiz.dto.QuizPage;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +38,7 @@ public interface QuizService {
 
   QuizDto getQuizById(UUID id);
 
-  Page<QuizDto> getQuiz(int page, int limit);
+  QuizPage getQuiz(int pageNo, int limit);
 
   @Transactional
   void deleteQuizById(UUID id);

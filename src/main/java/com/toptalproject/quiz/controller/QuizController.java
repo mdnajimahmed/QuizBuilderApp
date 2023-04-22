@@ -3,6 +3,7 @@ package com.toptalproject.quiz.controller;
 import com.toptalproject.quiz.dto.AnswerDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import com.toptalproject.quiz.dto.QuizPage;
 import com.toptalproject.quiz.service.QuizService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -37,11 +38,11 @@ public class QuizController {
   }
 
   @GetMapping
-  public Page<QuizDto> getQuiz(
+  public QuizPage getQuiz(
       @RequestParam("page")
-      @Valid @Min(value = 0, message = "Page number needs to be non zero") int page,
+      @Valid @Min(value = 0, message = "Page number needs to be non zero") int pageNo,
       @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
-    return quizService.getQuiz(page, limit);
+    return quizService.getQuiz(pageNo, limit);
   }
 
   @PostMapping

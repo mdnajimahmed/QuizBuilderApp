@@ -10,6 +10,7 @@ import com.toptalproject.quiz.data.repository.QuizRepository;
 import com.toptalproject.quiz.dto.AnswerDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import com.toptalproject.quiz.dto.QuizPage;
 import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.service.QuizAttemptService;
@@ -139,22 +140,25 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   @Override
-  public Page<QuizDto> getAttempts(int page, int limit) {
-    PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-    return quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(), pageRequest)
-        .map(this::buildQuizAttempt);
+  public QuizPage getAttempts(int pageNo, int limit) {
+    PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
+    Page<QuizDto> currentPage =
+        quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(), pageRequest)
+            .map(this::buildQuizAttempt);
+    return new QuizPage(currentPage.getContent(),pageNo,currentPage.getTotalPages(),limit);
   }
 
   @Override
-  public Page<QuizDto> getQuizStat(UUID id, int page, Integer limit) {
+  public QuizPage getQuizStat(UUID id, int pageNo, Integer limit) {
     Quiz quiz = quizRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
     if (!quiz.getCreatedBy().equals(principal.getCurrentAuditor().get())) {
       throw new BadRequestException("user can not view stat created by others");
     }
-    PageRequest pageRequest = PageRequest.of(page, limit, Sort.by("createdAt").descending());
-    return quizAttemptRepository.findByQuiz(quiz, pageRequest)
+    PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
+    Page<QuizDto> currentPage = quizAttemptRepository.findByQuiz(quiz, pageRequest)
         .map(this::buildQuizAttempt);
+    return new QuizPage(currentPage.getContent(), pageNo, currentPage.getTotalPages(), limit);
   }
 
   private QuizDto buildQuizAttempt(QuizAttempt quizAttempt) {
