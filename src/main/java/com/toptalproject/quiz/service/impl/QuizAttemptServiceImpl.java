@@ -53,34 +53,39 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     }
     QuizAttempt quizAttempt = new QuizAttempt();
     quizAttempt.setQuiz(quiz);
-    updateQuestionAttempt(quizAttempt, request);
+    calculateQuestionScore(quizAttempt, request);
     double quizScore = quizAttempt.getQuestionAttempts().stream().map(QuestionAttempt::getScore)
         .reduce(0.0, Double::sum);
     quizAttempt.setScore(quizScore);
     quizAttemptRepository.save(quizAttempt);
-    return buildQuizAttempt(quizAttempt);
+    return buildQuizAttemptDto(quizAttempt);
   }
 
 
-  private void updateQuestionAttempt(QuizAttempt quizAttempt, QuizDto request) {
-    request.getQuestions().forEach(questionAttemptRequest -> {
-      Question question = quizAttempt.getQuiz().getQuestions().stream()
-          .filter(q -> q.getId().equals(questionAttemptRequest.getId())).findAny()
-          .orElseThrow(() -> new NotFoundException(
-              Question.class.getCanonicalName(), questionAttemptRequest.getId()
-          ));
-      if (!question.isMultipleAnswer() && questionAttemptRequest.getOptions().size() > 1) {
-        throw new BadRequestException("Multiple answer not allowed in a single answer question");
-      }
-      String selectedIds = questionAttemptRequest.getOptions().stream()
-          .map(selectedOption -> selectedOption.getId().toString())
-          .collect(Collectors.joining(","));
+  private void calculateQuestionScore(QuizAttempt quizAttempt, QuizDto request) {
+    quizAttempt.getQuiz().getQuestions().forEach(question -> {
       QuestionAttempt questionAttempt = new QuestionAttempt();
-      questionAttempt.setSkipped(questionAttemptRequest.getOptions().isEmpty());
       questionAttempt.setQuestion(question);
-      questionAttempt.setScore(
-          calculateQuestionScore(question, questionAttemptRequest));
-      questionAttempt.setSelectedOptionIds(selectedIds);
+      QuestionDto questionReply =
+          request.getQuestions().stream().filter(q -> question.getId().equals(q.getId()))
+              .findAny().orElse(null);
+
+      // skipped
+      if (questionReply == null) {
+        questionAttempt.setSkipped(true);
+        questionAttempt.setSelectedOptionIds("");
+        questionAttempt.setScore(0.0);
+      } else {
+        if (!question.isMultipleAnswer() && questionReply.getOptions().size() > 1) {
+          throw new BadRequestException("Multiple answer not allowed in a single answer question");
+        }
+        String selectedIds = questionReply.getOptions().stream()
+            .map(selectedOption -> selectedOption.getId().toString())
+            .collect(Collectors.joining(","));
+        questionAttempt.setSkipped(false);
+        questionAttempt.setSelectedOptionIds(selectedIds);
+        questionAttempt.setScore(calculateQuestionScore(question, questionReply));
+      }
       quizAttempt.addQuestionAttempt(questionAttempt);
     });
   }
@@ -98,7 +103,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
   private double calculateMultipleAnswerQuestionScore(List<Option> options,
                                                       List<OptionDto> selectedOptions) {
-    if (selectedOptions.size() == 0) {
+    if (selectedOptions.isEmpty()) {
       return 0;
     }
     if (selectedOptions.size() == 1) {
@@ -143,8 +148,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
     Page<QuizDto> currentPage =
         quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(), pageRequest)
-            .map(this::buildQuizAttempt);
-    return new QuizPage(currentPage.getContent(),pageNo,currentPage.getTotalPages(),limit);
+            .map(this::buildQuizAttemptDto);
+    return new QuizPage(currentPage.getContent(), pageNo, currentPage.getTotalPages(), limit);
   }
 
   @Override
@@ -156,11 +161,11 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     }
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
     Page<QuizDto> currentPage = quizAttemptRepository.findByQuiz(quiz, pageRequest)
-        .map(this::buildQuizAttempt);
+        .map(this::buildQuizAttemptDto);
     return new QuizPage(currentPage.getContent(), pageNo, currentPage.getTotalPages(), limit);
   }
 
-  private QuizDto buildQuizAttempt(QuizAttempt quizAttempt) {
+  private QuizDto buildQuizAttemptDto(QuizAttempt quizAttempt) {
     return QuizDto.builder()
         .id(quizAttempt.getQuiz().getId())
         .published(quizAttempt.getQuiz().isPublished())
@@ -168,58 +173,32 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .title(quizAttempt.getQuiz().getTitle())
         .score(quizAttempt.getScore())
         .attemptedBy(quizAttempt.getCreatedBy())
-        .questions(buildQuestionAttemptsDto(quizAttempt.getQuiz().getQuestions(),
-            quizAttempt.getQuestionAttempts()))
+        .questions(buildQuestionAttemptsDto(quizAttempt.getQuestionAttempts()))
         .build();
   }
 
-  private List<QuestionDto> buildQuestionAttemptsDto(List<Question> questions,
-                                                     List<QuestionAttempt> questionAttempts) {
-    return questions.stream().map(question -> {
-      QuestionAttempt questionAttempt = questionAttempts.stream()
-          .filter(qa -> question.equals(qa.getQuestion())).findAny()
-          .orElse(null);
-      return buildQuestionAttemptDto(question, questionAttempt);
-    }).toList();
-  }
-
-  private QuestionDto buildQuestionAttemptDto(Question question, QuestionAttempt questionAttempt) {
-    QuestionDto.QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
-        .id(question.getId())
-        .text(question.getText())
-        .multipleAnswer(question.isMultipleAnswer());
-    if (questionAttempt == null) {
-      return
-          questionDtoBuilder.score(0.0)
-              .options(buildOptionsDto(question.getOptions()))
-              .build();
-    } else {
-      questionDtoBuilder
+  private List<QuestionDto> buildQuestionAttemptsDto(List<QuestionAttempt> questionsAttempts) {
+    return questionsAttempts.stream().map(questionAttempt -> {
+      Question question = questionAttempt.getQuestion();
+      return QuestionDto.builder()
+          .id(question.getId())
+          .text(question.getText())
+          .skipped(questionAttempt.isSkipped())
           .score(questionAttempt.getScore())
           .options(buildOptionsDto(question.getOptions(), questionAttempt.getSelectedOptionIds()))
-          .build();
-    }
-    return questionDtoBuilder.build();
-  }
-
-  private List<OptionDto> buildOptionsDto(List<Option> options) {
-    return options.stream().map(option -> buildOptionDto(option, false)).toList();
+          .multipleAnswer(question.isMultipleAnswer()).build();
+    }).toList();
   }
 
   private List<OptionDto> buildOptionsDto(List<Option> options, String selectedOptionIds) {
     Map<String, Boolean> selected = Arrays.stream(selectedOptionIds.split(",")).collect(
         Collectors.toMap(s -> s, s -> true));
     return options.stream().map(
-        option -> buildOptionDto(option, selected.getOrDefault(
-            option.getId().toString(), false))).toList();
-  }
+        option -> OptionDto.builder()
+            .text(option.getText())
+            .id(option.getId())
+            .selected(selected.getOrDefault(option.getId().toString(), false))
+            .build()).toList();
 
-  private OptionDto buildOptionDto(Option option, boolean isSelected) {
-    return OptionDto.builder()
-        .text(option.getText())
-        .id(option.getId())
-        .selected(isSelected)
-        .build();
   }
-
 }
