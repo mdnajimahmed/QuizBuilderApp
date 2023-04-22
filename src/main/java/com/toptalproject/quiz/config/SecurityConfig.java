@@ -34,19 +34,10 @@ public class SecurityConfig {
   }
 
   @Bean
-  public JwtAuthenticationConverter jwtAuthenticationConverter() {
-    JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-    jwtAuthenticationConverter.setPrincipalClaimName("sub");
-    return jwtAuthenticationConverter;
-  }
-
-  @Bean
   public AuditorAware<String> auditorAware() {
     return ()-> {
       Jwt claims = (Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-      return Optional.of(claims.getSubject());
+      return Optional.of(claims.getClaimAsString("email"));
     };
   }
 }
