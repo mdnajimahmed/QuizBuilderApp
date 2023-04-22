@@ -61,72 +61,72 @@ class QuizControllerTest {
     deleteQuestion();
     updateQuiz();
     publishQuestion();
-//    attemptQuiz(quizTaker1);
-//    attemptQuiz(quizTaker2);
+    attemptQuiz1();
+//    attemptQuiz2(quizTaker2);
 //    loadQuizCreateByMe();
 //    loadQuizStat();
 //    loadQuizzesTakenBy(quizTaker1);
 //    loadQuizzesTakenBy(quizTaker2);
   }
 
+  private void attemptQuiz1() {
+
+  }
+
+
   private void publishQuestion() {
-    quiz = sendRequest(null, quizAuthorToken,
-        String.format("quizzes/%s/publish", quiz.getId()),
+    quiz = sendRequest(null, quizAuthorToken, String.format("quizzes/%s/publish", quiz.getId()),
         QuizDto.class, HttpMethod.PUT);
-    Assertions.assertTrue(quiz.getQuestions().size() == 1);
-    Assertions.assertEquals(true,quiz.getPublished());
-    Assertions.assertEquals(LocalDate.now(),quiz.getPublishedAt().toLocalDate());
+    Assertions.assertEquals(2,quiz.getQuestions().size() );
+    Assertions.assertEquals(true, quiz.getPublished());
+    Assertions.assertEquals(LocalDate.now(), quiz.getPublishedAt().toLocalDate());
   }
 
   private void updateQuiz() {
     String title = "My first quiz ever!";
     QuizDto quizDto = QuizDto.builder().title(title).build();
-    quiz = sendRequest(quizDto, quizAuthorToken,
-        String.format("quizzes/%s", quiz.getId()),
+    quiz = sendRequest(quizDto, quizAuthorToken, String.format("quizzes/%s", quiz.getId()),
         QuizDto.class, HttpMethod.PUT);
-    Assertions.assertTrue(quiz.getQuestions().size() == 1);
-    Assertions.assertEquals(false,quiz.getPublished());
-    Assertions.assertEquals(title,quizDto.getTitle());
+    Assertions.assertEquals(2,quiz.getQuestions().size());
+    Assertions.assertEquals(false, quiz.getPublished());
+    Assertions.assertEquals(title, quizDto.getTitle());
 
   }
 
   private void deleteQuestion() {
     quiz = sendRequest(null, quizAuthorToken,
-        String.format("quizzes/%s/questions/%s", quiz.getId(), newQuestion.getId()),
-        QuizDto.class, HttpMethod.DELETE);
+        String.format("quizzes/%s/questions/%s", quiz.getId(), newQuestion.getId()), QuizDto.class,
+        HttpMethod.DELETE);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNull(newQuestion);
-    Assertions.assertTrue(quiz.getQuestions().size() == 1);
+    Assertions.assertEquals(2,quiz.getQuestions().size());
   }
 
   private void updateQuestion() {
     String title = "Which is the largest state in the USA";
-    QuestionDto questionDto = QuestionDto.builder().text(title)
-        .multipleAnswer(false)
-        .build();
+    QuestionDto questionDto = QuestionDto.builder().text(title).multipleAnswer(false).build();
     quiz = sendRequest(questionDto, quizAuthorToken,
-        String.format("quizzes/%s/questions/%s", quiz.getId(), newQuestion.getId()),
-        QuizDto.class, HttpMethod.PUT);
+        String.format("quizzes/%s/questions/%s", quiz.getId(), newQuestion.getId()), QuizDto.class,
+        HttpMethod.PUT);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertTrue(quiz.getQuestions().size() == 2);
+    Assertions.assertEquals(3,quiz.getQuestions().size());
     Assertions.assertEquals(title, newQuestion.getText());
   }
 
   private void deleteAnswer() {
     quiz = sendRequest(null, quizAuthorToken,
         String.format("quizzes/%s/questions/%s/answers/%s", quiz.getId(), newQuestion.getId(),
-            newAnswerUnderNewQuestion.getId()),
-        QuizDto.class, HttpMethod.DELETE);
+            newAnswerUnderNewQuestion.getId()), QuizDto.class, HttpMethod.DELETE);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertTrue(newQuestion.getAnswers().size() == 2);
+    Assertions.assertEquals(2,newQuestion.getAnswers().size());
     newAnswerUnderNewQuestion = newQuestion.getAnswers().stream()
         .filter(a -> newAnswerUnderNewQuestion.getId().equals(a.getId())).findAny().orElse(null);
     Assertions.assertNull(newAnswerUnderNewQuestion);
@@ -134,31 +134,25 @@ class QuizControllerTest {
 
   private void updateAnswer() {
     String questionText = "California";
-    AnswerDto answerDto = AnswerDto.builder()
-        .text(questionText)
-        .correct(false)
-        .build();
+    AnswerDto answerDto = AnswerDto.builder().text(questionText).correct(false).build();
 
     quiz = sendRequest(answerDto, quizAuthorToken,
         String.format("quizzes/%s/questions/%s/answers/%s", quiz.getId(), newQuestion.getId(),
-            newAnswerUnderNewQuestion.getId()),
-        QuizDto.class, HttpMethod.PUT);
+            newAnswerUnderNewQuestion.getId()), QuizDto.class, HttpMethod.PUT);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertTrue(newQuestion.getAnswers().size() == 3);
-    newAnswerUnderNewQuestion = newQuestion.getAnswers().stream()
-        .filter(a -> questionText.equals(a.getText())).findAny().orElse(null);
+    Assertions.assertEquals(3,newQuestion.getAnswers().size());
+    newAnswerUnderNewQuestion =
+        newQuestion.getAnswers().stream().filter(a -> questionText.equals(a.getText())).findAny()
+            .orElse(null);
     Assertions.assertNotNull(newAnswerUnderNewQuestion);
   }
 
   private void addAnswer() {
     String questionText = "Kalifornia";
-    AnswerDto answerDto = AnswerDto.builder()
-        .text(questionText)
-        .correct(false)
-        .build();
+    AnswerDto answerDto = AnswerDto.builder().text(questionText).correct(false).build();
 
     quiz = sendRequest(answerDto, quizAuthorToken,
         String.format("quizzes/%s/questions/%s/answers", quiz.getId(), newQuestion.getId()),
@@ -167,53 +161,45 @@ class QuizControllerTest {
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertTrue(newQuestion.getAnswers().size() == 3);
-    newAnswerUnderNewQuestion = newQuestion.getAnswers().stream()
-        .filter(a -> questionText.equals(a.getText())).findAny().orElse(null);
+    Assertions.assertEquals(3,newQuestion.getAnswers().size() );
+    newAnswerUnderNewQuestion =
+        newQuestion.getAnswers().stream().filter(a -> questionText.equals(a.getText())).findAny()
+            .orElse(null);
     Assertions.assertNotNull(newAnswerUnderNewQuestion);
   }
 
   private void addQuestion() {
     String title = "Which is the largest state in the United States of America";
-    QuestionDto questionDto = QuestionDto.builder().text(title)
-        .multipleAnswer(false)
-        .answers(Arrays.asList(
-            AnswerDto.builder()
-                .text("Texas")
-                .correct(false)
-                .build(),
-            AnswerDto.builder()
-                .text("Alaska")
-                .correct(true)
-                .build())).build();
+    QuestionDto questionDto = QuestionDto.builder().text(title).multipleAnswer(false).answers(
+        Arrays.asList(AnswerDto.builder().text("Texas").correct(false).build(),
+            AnswerDto.builder().text("Alaska").correct(true).build())).build();
     quiz = sendRequest(questionDto, quizAuthorToken,
-        String.format("quizzes/%s/questions", quiz.getId()),
-        QuizDto.class, HttpMethod.POST);
+        String.format("quizzes/%s/questions", quiz.getId()), QuizDto.class, HttpMethod.POST);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> title.equals(q.getText())).findAny().orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertTrue(quiz.getQuestions().size() == 2);
+    Assertions.assertEquals(3,quiz.getQuestions().size());
   }
 
   private void createQuiz() {
-    QuizDto dto = QuizDto.builder().title("My first quiz").published(false).questions(
-        Arrays.asList(
-            QuestionDto.builder().text("Moon is a star").multipleAnswer(false)
-                .answers(Arrays.asList(
-                    AnswerDto.builder()
-                        .text("Yes")
-                        .correct(false)
-                        .build(),
-                    AnswerDto.builder()
-                        .text("No")
-                        .correct(true)
-                        .build()
-                ))
-                .build())).build();
+    QuizDto dto = QuizDto.builder().title("My first quiz").published(false).questions(Arrays.asList(
+        QuestionDto.builder().text("Moon is a star").multipleAnswer(false).answers(
+            Arrays.asList(AnswerDto.builder().text("Yes").correct(false).build(),
+                AnswerDto.builder().text("No").correct(true).build())).build(),
+        QuestionDto.builder().text("Temperature can be measured in").multipleAnswer(true).answers(
+            Arrays.asList(
+                AnswerDto.builder().text("Kelvin").correct(true).build(),
+                AnswerDto.builder().text("Fahrenheit").correct(true).build(),
+                AnswerDto.builder().text("Gram").correct(false).build(),
+                AnswerDto.builder().text("Celsius").correct(true).build(),
+                AnswerDto.builder().text("Liters").correct(false).build()
+            )).build()
+
+    )).build();
     quiz = sendRequest(dto, quizAuthorToken, "quizzes", QuizDto.class, HttpMethod.POST);
     Assertions.assertEquals("My first quiz", quiz.getTitle());
     Assertions.assertEquals(false, quiz.getPublished());
-    Assertions.assertTrue(quiz.getQuestions().size() == 1);
+    Assertions.assertEquals(2,quiz.getQuestions().size());
 
   }
 
@@ -223,8 +209,7 @@ class QuizControllerTest {
     final HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(token);
     final HttpEntity<Object> request = new HttpEntity<>(data, headers);
-    ResponseEntity<S> response =
-        this.restTemplate.exchange(baseUrl, method, request, tClass);
+    ResponseEntity<S> response = this.restTemplate.exchange(baseUrl, method, request, tClass);
     Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
     return response.getBody();
   }
