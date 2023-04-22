@@ -5,6 +5,7 @@ import com.toptalproject.quiz.TokenService;
 import com.toptalproject.quiz.dto.AnswerDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import java.time.LocalDate;
 import java.util.Arrays;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Assertions;
@@ -59,13 +60,22 @@ class QuizControllerTest {
     updateQuestion();
     deleteQuestion();
     updateQuiz();
-//    publishQuestion();
+    publishQuestion();
 //    attemptQuiz(quizTaker1);
 //    attemptQuiz(quizTaker2);
 //    loadQuizCreateByMe();
 //    loadQuizStat();
 //    loadQuizzesTakenBy(quizTaker1);
 //    loadQuizzesTakenBy(quizTaker2);
+  }
+
+  private void publishQuestion() {
+    quiz = sendRequest(null, quizAuthorToken,
+        String.format("quizzes/%s/publish", quiz.getId()),
+        QuizDto.class, HttpMethod.PUT);
+    Assertions.assertTrue(quiz.getQuestions().size() == 1);
+    Assertions.assertEquals(true,quiz.getPublished());
+    Assertions.assertEquals(LocalDate.now(),quiz.getPublishedAt().toLocalDate());
   }
 
   private void updateQuiz() {
@@ -75,6 +85,7 @@ class QuizControllerTest {
         String.format("quizzes/%s", quiz.getId()),
         QuizDto.class, HttpMethod.PUT);
     Assertions.assertTrue(quiz.getQuestions().size() == 1);
+    Assertions.assertEquals(false,quiz.getPublished());
     Assertions.assertEquals(title,quizDto.getTitle());
 
   }
