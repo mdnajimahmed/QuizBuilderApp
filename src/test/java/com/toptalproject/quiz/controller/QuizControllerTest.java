@@ -38,6 +38,7 @@ class QuizControllerTest {
   private String quizTaker1;
   private String quizTaker2;
   QuizDto quiz;
+  QuizDto quizAttempt;
   QuestionDto newQuestion;
 
   AnswerDto newAnswerUnderNewQuestion;
@@ -70,6 +71,34 @@ class QuizControllerTest {
   }
 
   private void attemptQuiz1() {
+    QuizDto dto = QuizDto.builder()
+        .id(quiz.getId())
+        .questions(Arrays.asList(
+            QuestionDto.builder().
+                id(quiz.getQuestions().get(0).getId())
+                .answers(
+                    Arrays.asList(
+                        AnswerDto.builder()
+                            .id(quiz.getQuestions().get(0).getAnswers().get(0).getId())
+                            .build())).build(),
+            QuestionDto.builder().id(quiz.getQuestions().get(1).getId())
+                .answers(
+                    Arrays.asList(
+                        AnswerDto.builder()
+                            .id(quiz.getQuestions().get(1).getAnswers().get(0).getId()).build(),
+                        AnswerDto.builder()
+                            .id(quiz.getQuestions().get(1).getAnswers().get(1).getId()).build(),
+                        AnswerDto.builder()
+                            .id(quiz.getQuestions().get(1).getAnswers().get(2).getId()).build()
+                    )).build()
+
+        )).build();
+
+    quizAttempt = sendRequest(dto, quizTaker1, "attempts",
+        QuizDto.class, HttpMethod.POST);
+    Assertions.assertEquals(-0.8333333333333334, quizAttempt.getScore(),1e-6);
+    Assertions.assertEquals(-1.0, quizAttempt.getQuestions().get(0).getScore(),1e-6);
+    Assertions.assertEquals(0.16666666666666663, quizAttempt.getQuestions().get(1).getScore(),1e-6);
 
   }
 
@@ -77,7 +106,7 @@ class QuizControllerTest {
   private void publishQuestion() {
     quiz = sendRequest(null, quizAuthorToken, String.format("quizzes/%s/publish", quiz.getId()),
         QuizDto.class, HttpMethod.PUT);
-    Assertions.assertEquals(2,quiz.getQuestions().size() );
+    Assertions.assertEquals(2, quiz.getQuestions().size());
     Assertions.assertEquals(true, quiz.getPublished());
     Assertions.assertEquals(LocalDate.now(), quiz.getPublishedAt().toLocalDate());
   }
@@ -87,7 +116,7 @@ class QuizControllerTest {
     QuizDto quizDto = QuizDto.builder().title(title).build();
     quiz = sendRequest(quizDto, quizAuthorToken, String.format("quizzes/%s", quiz.getId()),
         QuizDto.class, HttpMethod.PUT);
-    Assertions.assertEquals(2,quiz.getQuestions().size());
+    Assertions.assertEquals(2, quiz.getQuestions().size());
     Assertions.assertEquals(false, quiz.getPublished());
     Assertions.assertEquals(title, quizDto.getTitle());
 
@@ -101,7 +130,7 @@ class QuizControllerTest {
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNull(newQuestion);
-    Assertions.assertEquals(2,quiz.getQuestions().size());
+    Assertions.assertEquals(2, quiz.getQuestions().size());
   }
 
   private void updateQuestion() {
@@ -114,7 +143,7 @@ class QuizControllerTest {
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(3,quiz.getQuestions().size());
+    Assertions.assertEquals(3, quiz.getQuestions().size());
     Assertions.assertEquals(title, newQuestion.getText());
   }
 
@@ -126,7 +155,7 @@ class QuizControllerTest {
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(2,newQuestion.getAnswers().size());
+    Assertions.assertEquals(2, newQuestion.getAnswers().size());
     newAnswerUnderNewQuestion = newQuestion.getAnswers().stream()
         .filter(a -> newAnswerUnderNewQuestion.getId().equals(a.getId())).findAny().orElse(null);
     Assertions.assertNull(newAnswerUnderNewQuestion);
@@ -143,7 +172,7 @@ class QuizControllerTest {
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(3,newQuestion.getAnswers().size());
+    Assertions.assertEquals(3, newQuestion.getAnswers().size());
     newAnswerUnderNewQuestion =
         newQuestion.getAnswers().stream().filter(a -> questionText.equals(a.getText())).findAny()
             .orElse(null);
@@ -161,7 +190,7 @@ class QuizControllerTest {
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(3,newQuestion.getAnswers().size() );
+    Assertions.assertEquals(3, newQuestion.getAnswers().size());
     newAnswerUnderNewQuestion =
         newQuestion.getAnswers().stream().filter(a -> questionText.equals(a.getText())).findAny()
             .orElse(null);
@@ -178,7 +207,7 @@ class QuizControllerTest {
     newQuestion =
         quiz.getQuestions().stream().filter(q -> title.equals(q.getText())).findAny().orElse(null);
     Assertions.assertNotNull(newQuestion);
-    Assertions.assertEquals(3,quiz.getQuestions().size());
+    Assertions.assertEquals(3, quiz.getQuestions().size());
   }
 
   private void createQuiz() {
@@ -199,7 +228,7 @@ class QuizControllerTest {
     quiz = sendRequest(dto, quizAuthorToken, "quizzes", QuizDto.class, HttpMethod.POST);
     Assertions.assertEquals("My first quiz", quiz.getTitle());
     Assertions.assertEquals(false, quiz.getPublished());
-    Assertions.assertEquals(2,quiz.getQuestions().size());
+    Assertions.assertEquals(2, quiz.getQuestions().size());
 
   }
 

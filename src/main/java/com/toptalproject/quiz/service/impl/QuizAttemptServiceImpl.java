@@ -165,20 +165,42 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .title(quizAttempt.getQuiz().getTitle())
         .score(quizAttempt.getScore())
         .attemptedBy(quizAttempt.getCreatedBy())
-        .questions(
-            quizAttempt.getQuestionAttempts().stream().map(this::buildQuestionAttemptDto).toList())
+        .questions(buildQuestionAttemptsDto(quizAttempt.getQuiz().getQuestions(),
+            quizAttempt.getQuestionAttempts()))
         .build();
   }
 
-  private QuestionDto buildQuestionAttemptDto(QuestionAttempt questionAttempt) {
-    return QuestionDto.builder()
-        .id(questionAttempt.getQuestion().getId())
-        .text(questionAttempt.getQuestion().getText())
-        .multipleAnswer(questionAttempt.getQuestion().isMultipleAnswer())
-        .score(questionAttempt.getScore())
-        .answers(buildAnswersDto(questionAttempt.getQuestion().getAnswers(),
-            questionAttempt.getSelectedAnswerIds()))
-        .build();
+  private List<QuestionDto> buildQuestionAttemptsDto(List<Question> questions,
+                                                     List<QuestionAttempt> questionAttempts) {
+    return questions.stream().map(question -> {
+      QuestionAttempt questionAttempt = questionAttempts.stream()
+          .filter(qa -> question.equals(qa.getQuestion())).findAny()
+          .orElse(null);
+      return buildQuestionAttemptDto(question, questionAttempt);
+    }).toList();
+  }
+
+  private QuestionDto buildQuestionAttemptDto(Question question, QuestionAttempt questionAttempt) {
+    QuestionDto.QuestionDtoBuilder questionDtoBuilder = QuestionDto.builder()
+        .id(question.getId())
+        .text(question.getText())
+        .multipleAnswer(question.isMultipleAnswer());
+    if (questionAttempt == null) {
+      return
+          questionDtoBuilder.score(0.0)
+              .answers(buildAnswersDto(question.getAnswers()))
+              .build();
+    } else {
+      questionDtoBuilder
+          .score(questionAttempt.getScore())
+          .answers(buildAnswersDto(question.getAnswers(), questionAttempt.getSelectedAnswerIds()))
+          .build();
+    }
+    return questionDtoBuilder.build();
+  }
+
+  private List<AnswerDto> buildAnswersDto(List<Answer> answers) {
+    return answers.stream().map(answer -> buildAnswerDto(answer, false)).toList();
   }
 
   private List<AnswerDto> buildAnswersDto(List<Answer> answers, String selectedAnswerIds) {
