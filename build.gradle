@@ -30,7 +30,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 	implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
-
+	implementation platform('software.amazon.awssdk:bom:2.20.26')
+	implementation 'software.amazon.awssdk:cognitoidentityprovider'
+	implementation 'software.amazon.awssdk:cognitoidentity'
+	testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.3'
 
 }
 
