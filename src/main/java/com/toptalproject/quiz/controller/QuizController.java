@@ -49,7 +49,7 @@ public class QuizController {
   }
 
   @PutMapping("/{id}")
-  public QuizDto updateQuiz(@PathVariable("id") UUID id, @RequestBody QuizDto request) {
+  public QuizDto updateQuiz(@PathVariable("id") UUID id, @Valid @RequestBody QuizDto request) {
     return quizService.updateQuiz(id, request);
   }
 
@@ -65,14 +65,14 @@ public class QuizController {
   }
 
   @PostMapping("/{id}/questions")
-  public QuizDto addQuestion(@PathVariable("id") UUID quizId, @RequestBody QuestionDto request) {
+  public QuizDto addQuestion(@PathVariable("id") UUID quizId, @Valid @RequestBody QuestionDto request) {
     return quizService.addQuestion(quizId, request);
   }
 
   @PutMapping("/{id}/questions/{questionId}")
   public QuizDto updateQuestion(@PathVariable("id") UUID quizId,
                                 @PathVariable("questionId") UUID questionId,
-                                @RequestBody QuestionDto request) {
+                                @Valid @RequestBody QuestionDto request) {
     return quizService.updateQuestion(quizId, questionId, request);
   }
 
@@ -85,7 +85,7 @@ public class QuizController {
   @PostMapping("/{id}/questions/{questionId}/options")
   public QuizDto addOption(@PathVariable("id") UUID quizId,
                            @PathVariable("questionId") UUID questionId,
-                           @RequestBody OptionDto request) {
+                           @Valid @RequestBody OptionDto request) {
     return quizService.addOptionToQuestion(quizId, questionId, request);
   }
 
@@ -93,7 +93,7 @@ public class QuizController {
   public QuizDto updateOption(@PathVariable("id") UUID quizId,
                               @PathVariable("questionId") UUID questionId,
                               @PathVariable("optionId") UUID optionId,
-                              @RequestBody OptionDto request) {
+                              @Valid @RequestBody OptionDto request) {
     return quizService.updateOption(quizId, questionId, optionId, request);
   }
 
