@@ -1,5 +1,6 @@
 package com.toptalproject.quiz.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -24,5 +25,5 @@ public class QuizDto {
   private Double score;
   private String attemptedBy;
   @Size(min = 1, max = 10, message = "The quiz is allowed to have at least 1 and at most 10 questions")
-  List<QuestionDto> questions = new ArrayList<>();
+  List<@Valid QuestionDto> questions = new ArrayList<>();
 }

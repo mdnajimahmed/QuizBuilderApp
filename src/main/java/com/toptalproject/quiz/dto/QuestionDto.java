@@ -1,6 +1,8 @@
 package com.toptalproject.quiz.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ public class QuestionDto {
   private Boolean skipped;
   private Double score;
   @Size(min = 1,max = 5, message = "The question is allowed to have at least 1 and at most 5 options")
+  @NotNull(message = "Options can not be null")
   private List<OptionDto> options = new ArrayList<>();
 
 }
