@@ -9,7 +9,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,7 +60,7 @@ public class QuizController {
   }
 
 
-  @PostMapping("/{id}/publish")
+  @PutMapping("/{id}/publish")
   public QuizDto publishQuiz(@PathVariable("id") UUID id) {
     return quizService.publishQuiz(id);
   }
@@ -71,7 +70,7 @@ public class QuizController {
     return quizService.addQuestion(quizId, request);
   }
 
-  @PostMapping("/{id}/questions/{questionId}")
+  @PutMapping("/{id}/questions/{questionId}")
   public QuizDto updateQuestion(@PathVariable("id") UUID quizId,
                              @PathVariable("questionId") UUID questionId,
                              @RequestBody QuestionDto request) {
@@ -91,7 +90,7 @@ public class QuizController {
     return quizService.addAnswerToQuestion(quizId, questionId, request);
   }
 
-  @PostMapping("/{id}/questions/{questionId}/answers/{answerId}")
+  @PutMapping("/{id}/questions/{questionId}/answers/{answerId}")
   public QuizDto updateAnswer(@PathVariable("id") UUID quizId,
                            @PathVariable("questionId") UUID questionId,
                            @PathVariable("answerId") UUID answerId,

@@ -58,8 +58,7 @@ class QuizControllerTest {
     deleteAnswer();
     updateQuestion();
     deleteQuestion();
-
-//    updateQuiz();
+    updateQuiz();
 //    publishQuestion();
 //    attemptQuiz(quizTaker1);
 //    attemptQuiz(quizTaker2);
@@ -67,6 +66,17 @@ class QuizControllerTest {
 //    loadQuizStat();
 //    loadQuizzesTakenBy(quizTaker1);
 //    loadQuizzesTakenBy(quizTaker2);
+  }
+
+  private void updateQuiz() {
+    String title = "My first quiz ever!";
+    QuizDto quizDto = QuizDto.builder().title(title).build();
+    quiz = sendRequest(quizDto, quizAuthorToken,
+        String.format("quizzes/%s", quiz.getId()),
+        QuizDto.class, HttpMethod.PUT);
+    Assertions.assertTrue(quiz.getQuestions().size() == 1);
+    Assertions.assertEquals(title,quizDto.getTitle());
+
   }
 
   private void deleteQuestion() {
@@ -87,7 +97,7 @@ class QuizControllerTest {
         .build();
     quiz = sendRequest(questionDto, quizAuthorToken,
         String.format("quizzes/%s/questions/%s", quiz.getId(), newQuestion.getId()),
-        QuizDto.class, HttpMethod.POST);
+        QuizDto.class, HttpMethod.PUT);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
@@ -121,7 +131,7 @@ class QuizControllerTest {
     quiz = sendRequest(answerDto, quizAuthorToken,
         String.format("quizzes/%s/questions/%s/answers/%s", quiz.getId(), newQuestion.getId(),
             newAnswerUnderNewQuestion.getId()),
-        QuizDto.class, HttpMethod.POST);
+        QuizDto.class, HttpMethod.PUT);
     newQuestion =
         quiz.getQuestions().stream().filter(q -> newQuestion.getId().equals(q.getId())).findAny()
             .orElse(null);
