@@ -39,10 +39,10 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   @Override
-  public void createQuizAttempt(QuizDto request) {
+  public QuizDto createQuizAttempt(QuizDto request) {
     Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
         () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
-    if(quiz.getCreatedBy().equals(principal.getCurrentAuditor().get())){
+    if (quiz.getCreatedBy().equals(principal.getCurrentAuditor().get())) {
       throw new BadRequestException("user can not take his own quiz");
     }
     if (!quiz.isPublished()) {
@@ -58,6 +58,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .reduce(0.0, Double::sum);
     quizAttempt.setScore(quizScore);
     quizAttemptRepository.save(quizAttempt);
+    return buildQuizAttempt(quizAttempt);
   }
 
 
@@ -175,16 +176,17 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         .text(questionAttempt.getQuestion().getText())
         .multipleAnswer(questionAttempt.getQuestion().isMultipleAnswer())
         .score(questionAttempt.getScore())
-        .answers(buildAnswerDto(questionAttempt.getQuestion().getAnswers(),
+        .answers(buildAnswersDto(questionAttempt.getQuestion().getAnswers(),
             questionAttempt.getSelectedAnswerIds()))
         .build();
   }
 
-  private List<AnswerDto> buildAnswerDto(List<Answer> answers, String selectedAnswerIds) {
+  private List<AnswerDto> buildAnswersDto(List<Answer> answers, String selectedAnswerIds) {
     Map<String, Boolean> selected = Arrays.stream(selectedAnswerIds.split(",")).collect(
         Collectors.toMap(s -> s, s -> true));
     return answers.stream().map(
-        answer -> buildAnswerDto(answer, selected.getOrDefault(answer.getId(), false))).toList();
+        answer -> buildAnswerDto(answer, selected.getOrDefault(
+            answer.getId().toString(), false))).toList();
   }
 
   private AnswerDto buildAnswerDto(Answer answer, boolean isSelected) {

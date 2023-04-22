@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,8 +25,8 @@ public class QuizAttemptController {
   }
 
   @PostMapping
-  public void createAttempt(@RequestBody QuizDto quizAttemptRequest) {
-    quizAttemptService.createQuizAttempt(quizAttemptRequest);
+  public QuizDto createAttempt(@RequestBody QuizDto quizAttemptRequest) {
+    return quizAttemptService.createQuizAttempt(quizAttemptRequest);
   }
 
   @GetMapping
