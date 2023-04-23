@@ -28,7 +28,7 @@
     - page no must be non-zero
     - limit must be between 1 and 100(inclusive).
 - PUT /quizzes/{id}
-  - Update meta data of a quiz. Supported properties
+  - Update meta data of a quiz. Supported properties are - 
     - Title
   - Validations:
     - Quiz title should be non-empty.
@@ -47,3 +47,64 @@
     - Quiz should exist in the system by the id, returns 404 otherwise.
     - Quiz should be in unpublished state.
     - The quiz must be authored by the requester. 
+- POST /quizzes/{id}/questions
+  - Add question to a quiz
+  - Validations:
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester. 
+    - The question should have a non-empty text
+    - The question should have 1 to 5 options
+    - The question should have at least one option selected as correct answer.
+    - Each option should have a non-empty text
+    - The quiz does not already have maximum number of 10 questions.
+- PUT /quizzes/{id}/questions/{questionId}
+  - Updates the metadata of an existing question under an existing quiz. Supported properties are - 
+    - text
+  - Validations:
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester.
+    - The question should have a non-empty text.
+    - The question must already exist under the quiz id provided.
+- DELETE /quizzes/{id}/questions/{questionId}
+  - Deletes an existing question under an existing quiz
+  - Validations:
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester.
+    - The question should have a non-empty text.
+    - The question must already exist under the quiz id provided.
+    - The question should not be the last existing question of a quiz, since the quiz must have at least one question.
+- POST /quizzes/{id}/questions/{questionId}/options
+  - Adds option to an existing question under and existing quiz.
+  - Validations:
+    - Option should have a non-empty text
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Question should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester.
+    - The question should have a non-empty text.
+    - The question must already exist under the quiz id provided.
+    - The question should not already have a maximum number of 5 questions.
+- PUT /quizzes/{id}/questions/{questionId}/options/{optionId}
+  - Updates the metadata of an existing option under an existing question under an existing quiz. Supported properties are -
+    - text
+    - correct `is it a correct answer for the question under which the option is added`
+  - Validations:
+    - Option should have a non-empty text
+    - The Quiz should exist in the system by the id, returns 404 otherwise.
+    - The Question should exist in the system by the id, returns 404 otherwise.
+    - The Option should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester.
+    - The question should have at least one correct answer after the update, otherwise the update will fail.
+- DELETE /quizzes/{id}/questions/{questionId}/options/{optionId}
+  - Delete an existing option under an question under an existing quiz. 
+  - Validations:
+    - The Quiz should exist in the system by the id, returns 404 otherwise.
+    - The Question should exist in the system by the id, returns 404 otherwise.
+    - The Option should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester.
+    - The question should have at least one correct answer after the delete operation, otherwise the update will fail.

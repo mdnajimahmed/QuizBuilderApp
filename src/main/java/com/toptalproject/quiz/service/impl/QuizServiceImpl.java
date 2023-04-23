@@ -83,7 +83,6 @@ class QuizServiceImpl implements QuizService {
   public QuizDto updateQuestion(UUID quizId, UUID questionId, QuestionInfoDto request) {
     Question question = selectQuestionForUpdate(quizId, questionId);
     question.setText(request.getText());
-    validateQuestion(question);
     return buildQuizDto(question.getQuiz());
   }
 
@@ -106,7 +105,6 @@ class QuizServiceImpl implements QuizService {
     }
     Option option = mapToOption(request);
     question.addOption(option);
-    validateQuestion(question);
     optionRepository.save(option);
     return buildQuizDto(question.getQuiz());
   }
@@ -124,8 +122,8 @@ class QuizServiceImpl implements QuizService {
   @Override
   public QuizDto deleteOption(UUID quizId, UUID questionId, UUID optionId) {
     Option option = selectOptionForUpdate(quizId, questionId, optionId);
-    if (option.getQuestion().getOptions().size() < 3) {
-      throw new BadRequestException("Question should have at least 2 answers");
+    if (option.getQuestion().getOptions().size() < 2) {
+      throw new BadRequestException("Question should have at least 1 answers");
     }
     Question question = option.getQuestion();
     option.getQuestion().removeOption(option);
