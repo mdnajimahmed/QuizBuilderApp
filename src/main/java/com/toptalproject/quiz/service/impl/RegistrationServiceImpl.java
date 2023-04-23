@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service;
 @Service
 class RegistrationServiceImpl implements RegistrationService {
   private final AppClients appClients;
-
   RegistrationServiceImpl(final AppClients appClients) {
     this.appClients = appClients;
   }
 
   @Override
-  public String getRedirectUri(String clientId) {
+  public String getRedirectUri(final String clientId) {
     final AppClients.AppClient appClient =
         appClients.getClientConfigs().stream().filter(c -> c.getClientId().equals(clientId))
             .findAny().orElseThrow(
