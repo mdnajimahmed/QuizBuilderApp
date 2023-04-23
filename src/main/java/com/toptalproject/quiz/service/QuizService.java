@@ -39,7 +39,7 @@ public interface QuizService {
 
   QuizDto getQuizById(UUID id);
 
-  QuizPage getQuizzes(boolean b, int pageNo, int limit);
+  QuizPage getQuizzes(boolean isAuthoredByMe, int pageNo, int limit);
 
   @Transactional
   void deleteQuizById(UUID id);

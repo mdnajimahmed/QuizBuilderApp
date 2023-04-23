@@ -39,11 +39,15 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   @Override
-  public QuizDto createQuizAttempt(QuizDto request) {
-    Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
-        () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
+  public QuizDto createQuizAttempt(UUID quizId, QuizDto request) {
+    if (!quizId.equals(request.getId())) {
+      throw new BadRequestException("Inconsistent quiz id provided in the payload");
+    }
+    Quiz quiz = quizRepository.findById(quizId).orElseThrow(
+        () -> new NotFoundException(Quiz.class.getCanonicalName(), quizId));
     String currentUser =
-        principal.getCurrentAuditor().orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
     if (quiz.getCreatedBy().equals(currentUser)) {
       throw new BadRequestException("user can not take his own quiz");
     }
@@ -148,7 +152,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   public QuizPage getAttempts(int pageNo, int limit) {
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
     String currentUser =
-        principal.getCurrentAuditor().orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
     Page<QuizDto> currentPage =
         quizAttemptRepository.findByCreatedBy(currentUser, pageRequest)
             .map(this::buildQuizAttemptDto);
@@ -160,7 +165,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     Quiz quiz = quizRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
     String currentUser =
-        principal.getCurrentAuditor().orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
     if (!quiz.getCreatedBy().equals(currentUser)) {
       throw new BadRequestException("user can not view stat created by others");
     }
@@ -190,7 +196,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
           .text(question.getText())
           .skipped(questionAttempt.isSkipped())
           .score(questionAttempt.getScore())
-          .options(buildOptionsDto(question.getOptions(), questionAttempt.getSelectedOptionIds())).build();
+          .options(buildOptionsDto(question.getOptions(), questionAttempt.getSelectedOptionIds()))
+          .build();
     }).toList();
   }
 

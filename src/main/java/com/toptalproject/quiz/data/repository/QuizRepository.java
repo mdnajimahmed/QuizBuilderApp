@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizRepository extends JpaRepository<Quiz, UUID> {
-  Page<Quiz> findByCreatedByNot(String createdBy, PageRequest pageRequest);
+  Page<Quiz> findByCreatedByNotAndPublishedTrue(String createdBy, PageRequest pageRequest);
 
   Page<Quiz> findByCreatedBy(String currentUser, PageRequest pageRequest);
 }

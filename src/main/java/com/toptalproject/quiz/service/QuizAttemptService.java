@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface QuizAttemptService {
   @Transactional
-  QuizDto createQuizAttempt(QuizDto request);
+  QuizDto createQuizAttempt(UUID quizId, QuizDto request);
 
   QuizPage getAttempts(int page, int limit);
 

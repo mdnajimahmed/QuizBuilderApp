@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.mapping.ToOne;
 
 @Entity
 @Table(name = "question_attempts")
@@ -19,9 +20,9 @@ public class QuestionAttempt extends BaseEntity {
   private boolean skipped;
   private String selectedOptionIds;
   @ManyToOne
-  @JoinColumn(name="quiz_attempt_id", nullable=false)
+  @JoinColumn(name = "quiz_attempt_id", nullable = false)
   private QuizAttempt quizAttempt;
-  @OneToOne
-  @JoinColumn(name = "question_id", referencedColumnName = "id")
+  @ManyToOne
+  @JoinColumn(name = "question_id", referencedColumnName = "id", nullable = false)
   private Question question;
 }

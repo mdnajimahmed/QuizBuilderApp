@@ -1,0 +1,140 @@
+# Quiz management APIs:
+- POST /quizzes
+    - Create a new quiz
+    - We can publish the quiz while creating setting `published` flag to true
+    - Validations:
+        - Quiz title should be non-empty
+        - Quiz should have at least 1 and at most 10 questions
+        - Each question should have a non-empty text
+        - Each question should have 1 to 5 options
+        - Each question should have at least one option selected as correct answer.
+        - Each option should have a non-empty text
+- GET /quizzes/{id}
+    - Gets the details of a quiz by its id
+    - Returns 404 if an invalid id is provided.
+- GET /quizzes
+    - Returns all the quizzes authored by me(recently updated quizzes come first)
+    - Query Params:
+        - pageNo: select a page from the result set
+        - limit: number of items per page.
+    - Validations:
+        - page no must be non-zero
+        - limit must be between 1 and 100(inclusive).
+- GET /quizzes/search
+    - Returns all the quizzes authored by other users which I can take as a user(recently published quizzes come first).
+    - Query Params:
+        - pageNo: select a page from the result set
+        - limit: number of items per page.
+    - Validations:
+        - page no must be non-zero
+        - limit must be between 1 and 100(inclusive).
+- PUT /quizzes/{id}
+    - Update meta data of a quiz. Supported properties are -
+        - Title
+    - Validations:
+        - Quiz title should be non-empty.
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+- DELETE /quizzes/{id}
+    - Delete a quiz by id.
+    - Validations:
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+- PUT /quizzes/{id}/publish
+    - Publish a quiz
+    - Validations:
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+- POST /quizzes/{id}/questions
+    - Add question to a quiz
+    - Validations:
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+        - The question should have a non-empty text
+        - The question should have 1 to 5 options
+        - The question should have at least one option selected as correct answer.
+        - Each option should have a non-empty text
+        - The quiz does not already have maximum number of 10 questions.
+- PUT /quizzes/{id}/questions/{questionId}
+    - Updates the metadata of an existing question under an existing quiz. Supported properties are -
+        - text
+    - Validations:
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Question should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+        - The question should have a non-empty text.
+- DELETE /quizzes/{id}/questions/{questionId}
+    - Deletes an existing question under an existing quiz
+    - Validations:
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Question should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+        - The question should not be the last existing question of a quiz, since the quiz must have at least one question.
+- POST /quizzes/{id}/questions/{questionId}/options
+    - Adds option to an existing question under and existing quiz.
+    - Validations:
+        - Option should have a non-empty text
+        - Quiz should exist in the system by the id, returns 404 otherwise.
+        - Question should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+        - The question should not already have a maximum number of 5 options.
+- PUT /quizzes/{id}/questions/{questionId}/options/{optionId}
+    - Updates the metadata of an existing option under an existing question under an existing quiz. Supported properties are -
+        - text
+        - correct `is it a correct answer for the question under which the option is added`
+    - Validations:
+        - Option should have a non-empty text
+        - The Quiz should exist in the system by the id, returns 404 otherwise.
+        - The Question should exist in the system by the id, returns 404 otherwise.
+        - The Option should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+        - The question should have at least one correct answer after the update, otherwise the update will fail.
+- DELETE /quizzes/{id}/questions/{questionId}/options/{optionId}
+    - Delete an existing option under an exiting question under an existing quiz.
+    - Validations:
+        - The Quiz should exist in the system by the id, returns 404 otherwise.
+        - The Question should exist in the system by the id, returns 404 otherwise.
+        - The Option should exist in the system by the id, returns 404 otherwise.
+        - Quiz should be in unpublished state.
+        - The quiz must be authored by the requester.
+        - The question should have at least one correct answer after the delete operation, otherwise the update will fail.
+        - The option can not be the only option under a question.
+# Quiz Attempt APIs:
+- POST /attempts/{quizId}
+  - Attempt a quiz
+  - Validations:
+    - quizId must be non-null
+    - The Quiz should exist in the system by the id, returns 404 otherwise.
+    - The quiz must be created by other users.
+    - The quiz must be in published state.
+    - The user has not already attempted the quiz.
+  - It is possible that the user has not attempted any question under a quiz attempt!
+- GET /attempts
+  - See the list of quizzes attempted the user herself. (The list will be sorted from latest to oldest attempt)
+  - Query Params:
+      - pageNo: select a page from the result set
+      - limit: number of items per page.
+  - Validations:
+      - page no must be non-zero
+      - limit must be between 1 and 100(inclusive).
+- GET /attempts/stat/{quizId}
+  - Get the attempts taken for a quiz. (The list will be sorted from latest to oldest attempt)
+  - Query Params:
+      - pageNo: select a page from the result set
+      - limit: number of items per page.
+  - Validations:
+    - page no must be non-zero
+    - limit must be between 1 and 100(inclusive).
+    - quizId must be non-null
+    - The Quiz should exist in the system by the id, returns 404 otherwise.
+    - The quiz must be created by the requester.
+      
+  

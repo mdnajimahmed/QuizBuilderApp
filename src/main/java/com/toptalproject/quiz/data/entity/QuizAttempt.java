@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -19,8 +20,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class QuizAttempt extends BaseEntity {
-  @OneToOne
-  @JoinColumn(name = "quiz_id", referencedColumnName = "id")
+  @ManyToOne
+  @JoinColumn(name = "quiz_id", referencedColumnName = "id",nullable = false)
   private Quiz quiz;
   private double score;
   @OneToMany(mappedBy = "quizAttempt",fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.REMOVE})

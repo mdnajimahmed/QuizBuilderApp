@@ -140,15 +140,17 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizPage getQuizzes(boolean isAuthoredByMe, int pageNo, int limit) {
-    PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
+    String sortBy = isAuthoredByMe ? "updatedAt" : "publishedAt";
+    PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by(sortBy).descending());
     String currentUser =
         principal.getCurrentAuditor()
             .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
     Page<Quiz> currentQuizPage =
         isAuthoredByMe ? quizRepository.findByCreatedBy(currentUser, pageRequest) :
-            quizRepository.findByCreatedByNot(currentUser, pageRequest);
+            quizRepository.findByCreatedByNotAndPublishedTrue(currentUser, pageRequest);
     Page<QuizDto> currentQuizDtoPage = currentQuizPage.map(this::buildQuizDto);
-    return new QuizPage(currentQuizDtoPage.getContent(), pageNo, currentQuizDtoPage.getTotalPages(), limit);
+    return new QuizPage(currentQuizDtoPage.getContent(), pageNo, currentQuizDtoPage.getTotalPages(),
+        limit);
   }
 
   @Override
