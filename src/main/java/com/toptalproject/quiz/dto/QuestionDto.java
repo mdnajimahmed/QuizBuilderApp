@@ -19,7 +19,7 @@ public class QuestionDto {
   private String text;
   private Boolean skipped;
   private Double score;
-  @Size(min = 1,max = 5, message = "The question is allowed to have at least 1 and at most 5 options")
+  @Size(min = 1, max = 5, message = "A question is allowed to have 1 to 5 options")
   @NotNull(message = "Options can not be null")
   private List<OptionDto> options = new ArrayList<>();
 

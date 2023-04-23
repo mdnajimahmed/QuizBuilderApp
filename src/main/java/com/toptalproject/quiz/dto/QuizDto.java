@@ -27,6 +27,6 @@ public class QuizDto {
   private LocalDateTime publishedAt;
   private Double score;
   private String attemptedBy;
-  @Size(min = 1, max = 10, message = "The quiz is allowed to have at least 1 and at most 10 questions")
+  @Size(min = 1, max = 10, message = "The quiz is allowed to have 1 to 10 questions")
   List<@Valid QuestionDto> questions = new ArrayList<>();
 }
