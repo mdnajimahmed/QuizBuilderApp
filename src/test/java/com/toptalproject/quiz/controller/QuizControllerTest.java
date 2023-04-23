@@ -1,7 +1,7 @@
 package com.toptalproject.quiz.controller;
 
 import com.toptalproject.quiz.PostgresqlContainer;
-import com.toptalproject.quiz.TokenService;
+import com.toptalproject.quiz.CognitoTokenService;
 import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
 import com.toptalproject.quiz.dto.QuizDto;
@@ -21,10 +21,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("staging")
 class QuizControllerTest {
   @ClassRule
   public static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
@@ -34,7 +36,7 @@ class QuizControllerTest {
   @Autowired
   private TestRestTemplate restTemplate;
   @Autowired
-  private TokenService tokenService;
+  private CognitoTokenService cognitoTokenService;
   private String quizAuthorToken;
   private String quizTaker1;
   QuizDto quiz;
@@ -45,8 +47,8 @@ class QuizControllerTest {
 
   @BeforeAll
   void setup() throws Exception {
-    quizAuthorToken = tokenService.getToken("quizCreatorUser@toptalQuizApp.com", "aA.123456789");
-    quizTaker1 = tokenService.getToken("quizTaker01@toptalQuizApp.com", "aA.123456789");
+    quizAuthorToken = cognitoTokenService.getToken("quizCreatorUser@toptalQuizApp.com", "aA.123456789");
+    quizTaker1 = cognitoTokenService.getToken("quizTaker01@toptalQuizApp.com", "aA.123456789");
   }
 
 
