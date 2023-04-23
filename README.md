@@ -1,1 +1,2 @@
 - To get an overview of the APIs please read api.md file.
+- To know the configurations for the application please read configuration.md

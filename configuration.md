@@ -11,6 +11,7 @@
 - Optional:
   - SERVER_PORT (default 8080)
   - LOGGING_LEVEL(default: DEBUG)
+  - CONTEXT_PATH( by default /)
 
 ## Test
 
