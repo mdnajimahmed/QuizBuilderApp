@@ -20,7 +20,6 @@ import lombok.Setter;
 @Setter
 public class Question extends BaseEntity {
   private String text;
-  private boolean isMultipleAnswer;
   @ManyToOne
   @JoinColumn(name = "quiz_id", nullable = false)
   private Quiz quiz;

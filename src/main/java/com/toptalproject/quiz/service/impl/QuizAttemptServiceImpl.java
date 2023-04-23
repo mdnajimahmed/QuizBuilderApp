@@ -76,9 +76,6 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         questionAttempt.setSelectedOptionIds("");
         questionAttempt.setScore(0.0);
       } else {
-        if (!question.isMultipleAnswer() && questionReply.getOptions().size() > 1) {
-          throw new BadRequestException("Multiple answer not allowed in a single answer question");
-        }
         String selectedIds = questionReply.getOptions().stream()
             .map(selectedOption -> selectedOption.getId().toString())
             .collect(Collectors.joining(","));
@@ -93,7 +90,9 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
   private double calculateQuestionScore(Question question,
                                         QuestionDto questionAttemptRequest) {
-    if (question.isMultipleAnswer()) {
+    boolean isMultipleAnswer =
+        question.getOptions().stream().filter(o -> o.isCorrect()).count() == 1;
+    if (isMultipleAnswer) {
       return calculateMultipleAnswerQuestionScore(question.getOptions(),
           questionAttemptRequest.getOptions());
     }
@@ -185,8 +184,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
           .text(question.getText())
           .skipped(questionAttempt.isSkipped())
           .score(questionAttempt.getScore())
-          .options(buildOptionsDto(question.getOptions(), questionAttempt.getSelectedOptionIds()))
-          .multipleAnswer(question.isMultipleAnswer()).build();
+          .options(buildOptionsDto(question.getOptions(), questionAttempt.getSelectedOptionIds())).build();
     }).toList();
   }
 

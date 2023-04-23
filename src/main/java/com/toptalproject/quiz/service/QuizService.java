@@ -2,7 +2,9 @@ package com.toptalproject.quiz.service;
 
 import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
+import com.toptalproject.quiz.dto.QuestionInfoDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import com.toptalproject.quiz.dto.QuizInfoDto;
 import com.toptalproject.quiz.dto.QuizPage;
 import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +14,7 @@ public interface QuizService {
   QuizDto createQuiz(QuizDto request);
 
   @Transactional
-  QuizDto updateQuiz(UUID id, QuizDto request);
+  QuizDto updateQuiz(UUID id, QuizInfoDto request);
 
   @Transactional
   QuizDto publishQuiz(UUID id);
@@ -21,7 +23,7 @@ public interface QuizService {
   QuizDto addQuestion(UUID quizId, QuestionDto request);
 
   @Transactional
-  QuizDto updateQuestion(UUID quizId, UUID questionId, QuestionDto request);
+  QuizDto updateQuestion(UUID quizId, UUID questionId, QuestionInfoDto request);
 
   @Transactional
   QuizDto deleteQuestion(UUID quizId, UUID questionId);

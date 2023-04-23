@@ -2,7 +2,9 @@ package com.toptalproject.quiz.controller;
 
 import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
+import com.toptalproject.quiz.dto.QuestionInfoDto;
 import com.toptalproject.quiz.dto.QuizDto;
+import com.toptalproject.quiz.dto.QuizInfoDto;
 import com.toptalproject.quiz.dto.QuizPage;
 import com.toptalproject.quiz.service.QuizService;
 import jakarta.validation.Valid;
@@ -49,7 +51,7 @@ public class QuizController {
   }
 
   @PutMapping("/{id}")
-  public QuizDto updateQuiz(@PathVariable("id") UUID id, @Valid @RequestBody QuizDto request) {
+  public QuizDto updateQuiz(@PathVariable("id") UUID id, @Valid @RequestBody QuizInfoDto request) {
     return quizService.updateQuiz(id, request);
   }
 
@@ -72,7 +74,7 @@ public class QuizController {
   @PutMapping("/{id}/questions/{questionId}")
   public QuizDto updateQuestion(@PathVariable("id") UUID quizId,
                                 @PathVariable("questionId") UUID questionId,
-                                @Valid @RequestBody QuestionDto request) {
+                                @Valid @RequestBody QuestionInfoDto request) {
     return quizService.updateQuestion(quizId, questionId, request);
   }
 

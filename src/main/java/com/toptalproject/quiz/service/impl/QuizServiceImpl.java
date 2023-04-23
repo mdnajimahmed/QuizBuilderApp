@@ -7,6 +7,8 @@ import com.toptalproject.quiz.data.repository.OptionRepository;
 import com.toptalproject.quiz.data.repository.QuestionRepository;
 import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
+import com.toptalproject.quiz.dto.QuestionInfoDto;
+import com.toptalproject.quiz.dto.QuizInfoDto;
 import com.toptalproject.quiz.dto.QuizPage;
 import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.error.NotFoundException;
@@ -41,7 +43,7 @@ class QuizServiceImpl implements QuizService {
     Quiz quiz = new Quiz();
     quiz.setTitle(request.getTitle());
     quiz.setPublished(request.getPublished());
-    if (request.getPublished()) {
+    if (Boolean.TRUE.equals(request.getPublished())) {
       quiz.setPublishedAt(LocalDateTime.now());
     }
     request.getQuestions().forEach(q -> quiz.addQuestion(mapToQuestion(q)));
@@ -51,7 +53,7 @@ class QuizServiceImpl implements QuizService {
 
 
   @Override
-  public QuizDto updateQuiz(UUID id, QuizDto request) {
+  public QuizDto updateQuiz(UUID id, QuizInfoDto request) {
     Quiz quiz = selectQuizForUpdate(id);
     quiz.setTitle(request.getTitle());
     return buildQuizDto(quiz);
@@ -78,10 +80,9 @@ class QuizServiceImpl implements QuizService {
   }
 
   @Override
-  public QuizDto updateQuestion(UUID quizId, UUID questionId, QuestionDto request) {
+  public QuizDto updateQuestion(UUID quizId, UUID questionId, QuestionInfoDto request) {
     Question question = selectQuestionForUpdate(quizId, questionId);
     question.setText(request.getText());
-    question.setMultipleAnswer(request.getMultipleAnswer());
     validateQuestion(question);
     return buildQuizDto(question.getQuiz());
   }
@@ -143,7 +144,7 @@ class QuizServiceImpl implements QuizService {
   public QuizPage getQuiz(int pageNo, int limit) {
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
     Page<QuizDto> currentPage = quizRepository.findAll(pageRequest).map(this::buildQuizDto);
-    return new QuizPage(currentPage.getContent(),pageNo,currentPage.getTotalPages(),limit);
+    return new QuizPage(currentPage.getContent(), pageNo, currentPage.getTotalPages(), limit);
   }
 
   @Override
@@ -155,7 +156,6 @@ class QuizServiceImpl implements QuizService {
   private Question mapToQuestion(QuestionDto questionRequest) {
     Question question = new Question();
     question.setText(questionRequest.getText());
-    question.setMultipleAnswer(questionRequest.getMultipleAnswer());
     questionRequest.getOptions()
         .forEach(selectedOption -> question.addOption(mapToOption(selectedOption)));
     validateQuestion(question);
@@ -174,13 +174,6 @@ class QuizServiceImpl implements QuizService {
     if (correctAnsCount == 0) {
       throw new BadRequestException("No correct answer provided for the question");
     }
-    if (question.isMultipleAnswer() && correctAnsCount == 1) {
-      throw new BadRequestException("Multiple answer question requires at least 2 correct answer");
-    }
-    if (!question.isMultipleAnswer() && correctAnsCount > 1) {
-      throw new BadRequestException(
-          "Single answer question can not have more than one correct answer");
-    }
   }
 
   private QuizDto buildQuizDto(Quiz quiz) {
@@ -197,7 +190,6 @@ class QuizServiceImpl implements QuizService {
     return QuestionDto.builder()
         .id(question.getId())
         .text(question.getText())
-        .multipleAnswer(question.isMultipleAnswer())
         .options(question.getOptions().stream().map(this::buildOptionDto).toList())
         .build();
   }
@@ -225,18 +217,15 @@ class QuizServiceImpl implements QuizService {
 
   private Question selectQuestionForUpdate(UUID quizId, UUID questionId) {
     Quiz quiz = selectQuizForUpdate(quizId);
-    Question question =
-        quiz.getQuestions().stream().filter(q -> q.getId().equals(questionId)).findAny()
-            .orElseThrow(
-                () -> new NotFoundException(Question.class.getCanonicalName(), questionId));
-    return question;
+    return quiz.getQuestions().stream().filter(q -> q.getId().equals(questionId)).findAny()
+        .orElseThrow(
+            () -> new NotFoundException(Question.class.getCanonicalName(), questionId));
   }
 
   private Option selectOptionForUpdate(UUID quizId, UUID questionId, UUID optionId) {
     Question question = selectQuestionForUpdate(quizId, questionId);
-    Option option = question.getOptions().stream().filter(a -> a.getId().equals(optionId)).findAny()
+    return question.getOptions().stream().filter(a -> a.getId().equals(optionId)).findAny()
         .orElseThrow(() -> new NotFoundException(Option.class.getCanonicalName(), optionId));
-    return option;
   }
 
 }

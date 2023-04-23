@@ -1,6 +1,5 @@
 package com.toptalproject.quiz.dto;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,7 +15,6 @@ public class QuestionDto {
   private UUID id;
   @NotEmpty(message = "Question text can not be empty")
   private String text;
-  private Boolean multipleAnswer;
   private Boolean skipped;
   private Double score;
   @Size(min = 1,max = 5, message = "The question is allowed to have at least 1 and at most 5 options")
