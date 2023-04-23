@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    generate-ddl: true
+  datasource:
+    password: pgtest
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: pgtest
+    url: jdbc:tc:postgresql:15.2-alpine://localhost:5432/postgres
+

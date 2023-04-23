@@ -8,7 +8,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://cognito-idp.ap-southeast-2.amazonaws.com/ap-southeast-2_5Xy5gOXtg
+          issuer-uri: https://cognito-idp.ap-southeast-2.amazonaws.com/${POOL_ID}
   flyway:
     enabled: true
     baselineVersion: 0.0.0.0
@@ -22,15 +22,15 @@ spring:
     generate-ddl: true
     properties:
       hibernate:
-        format_sql=true:
+        format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create-drop
   datasource:
-    password: ${DB_PASSWORD:postgres}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
-    username: ${DB_USERNAME:postgres}
-    url: jdbc:postgresql://${DB_URL:localhost}:5432/${DB_NAME:postgres}
+    username: ${DB_USERNAME}
+    url: jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
     hikari:
       schema: public
 
@@ -42,7 +42,7 @@ logging:
           '*': ${LOGGING_LEVEL:DEBUG}
     org:
       springframework:
-        security: INFO
+        security: ${LOGGING_LEVEL:INFO}
 
 app:
   clientConfigs:
