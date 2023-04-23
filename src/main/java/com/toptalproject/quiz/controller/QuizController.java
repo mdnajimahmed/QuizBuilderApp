@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/quizzes")
 @Validated
+@Slf4j
 public class QuizController {
   public QuizController(QuizService quizService) {
     this.quizService = quizService;
@@ -44,6 +46,7 @@ public class QuizController {
       @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
     return quizService.getQuizzes(true, pageNo, limit);
   }
+
   @GetMapping("/search")
   public QuizPage searchQuiz(
       @RequestParam("page")

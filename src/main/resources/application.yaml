@@ -38,8 +38,7 @@ logging:
   level:
     com:
       toptalproject:
-        quiz:
-          '*': ${LOGGING_LEVEL:DEBUG}
+        quiz: ${LOGGING_LEVEL:DEBUG}
     org:
       springframework:
         security: ${LOGGING_LEVEL:INFO}
