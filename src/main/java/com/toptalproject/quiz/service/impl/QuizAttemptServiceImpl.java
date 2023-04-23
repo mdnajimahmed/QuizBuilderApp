@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 class QuizAttemptServiceImpl implements QuizAttemptService {
   private final QuizRepository quizRepository;
   private final QuizAttemptRepository quizAttemptRepository;
@@ -40,6 +42,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
   @Override
   public QuizDto createQuizAttempt(UUID quizId, QuizDto request) {
+    log.info("Attempting quiz {}", quizId);
     if (!quizId.equals(request.getId())) {
       throw new BadRequestException("Inconsistent quiz id provided in the payload");
     }
@@ -75,7 +78,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
       QuestionDto questionReply =
           request.getQuestions().stream().filter(q -> question.getId().equals(q.getId()))
               .findAny().orElse(null);
-
+      log.debug("Question {} skipped", question.getText());
       // skipped
       if (questionReply == null) {
         questionAttempt.setSkipped(true);
@@ -85,6 +88,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         String selectedIds = questionReply.getOptions().stream()
             .map(selectedOption -> selectedOption.getId().toString())
             .collect(Collectors.joining(","));
+        log.debug("Selected answers = {}", selectedIds);
         questionAttempt.setSkipped(false);
         questionAttempt.setSelectedOptionIds(selectedIds);
         questionAttempt.setScore(calculateQuestionScore(question, questionReply));
@@ -98,6 +102,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
                                         QuestionDto questionAttemptRequest) {
     boolean isMultipleAnswer =
         question.getOptions().stream().filter(Option::isCorrect).count() > 1;
+    log.debug("Calculating score for question = {}, isMultiple = {}", question.getText(),
+        isMultipleAnswer);
     if (isMultipleAnswer) {
       return calculateMultipleAnswerQuestionScore(question.getOptions(),
           questionAttemptRequest.getOptions());
@@ -128,6 +134,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
         }
       }
     }
+    log.debug("Score = {}", score);
     return score;
   }
 
@@ -150,6 +157,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
   @Override
   public QuizPage getAttempts(int pageNo, int limit) {
+    log.info("Fetch attempts, pageNo = {},limit = {}", pageNo, limit);
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
     String currentUser =
         principal.getCurrentAuditor()
@@ -162,6 +170,8 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
 
   @Override
   public QuizPage getQuizStat(UUID id, int pageNo, Integer limit) {
+    log.info("Getting quiz stat for id = {} , page = {}, limit = {}",
+        id, pageNo, limit);
     Quiz quiz = quizRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
     String currentUser =

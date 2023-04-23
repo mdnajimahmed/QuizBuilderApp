@@ -17,6 +17,7 @@ import com.toptalproject.quiz.dto.QuizDto;
 import com.toptalproject.quiz.service.QuizService;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 class QuizServiceImpl implements QuizService {
   private final QuizRepository quizRepository;
   private final QuestionRepository questionRepository;
@@ -40,6 +42,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto createQuiz(QuizDto request) {
+    log.info("Creating quiz, payload = {}", request);
     Quiz quiz = new Quiz();
     quiz.setTitle(request.getTitle());
     quiz.setPublished(request.getPublished());
@@ -54,6 +57,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto updateQuiz(UUID id, QuizInfoDto request) {
+    log.info("Updating quiz = {}, payload = {}", id, request);
     Quiz quiz = selectQuizForUpdate(id);
     quiz.setTitle(request.getTitle());
     return buildQuizDto(quiz);
@@ -61,6 +65,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto publishQuiz(UUID id) {
+    log.info("Publish quiz = {}", id);
     Quiz quiz = selectQuizForUpdate(id);
     quiz.setPublished(true);
     quiz.setPublishedAt(LocalDateTime.now());
@@ -69,6 +74,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto addQuestion(UUID quizId, QuestionDto request) {
+    log.info("Adding question to quiz = {}, payload = {}", quizId, request);
     Quiz quiz = selectQuizForUpdate(quizId);
     if (quiz.getQuestions().size() > 10) {
       throw new BadRequestException("The quiz already has a maximum number of 10 questions");
@@ -81,6 +87,8 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto updateQuestion(UUID quizId, UUID questionId, QuestionInfoDto request) {
+    log.info("updating question under quiz = {}, question = {}, payload = {}", quizId, questionId,
+        request);
     Question question = selectQuestionForUpdate(quizId, questionId);
     question.setText(request.getText());
     return buildQuizDto(question.getQuiz());
@@ -88,6 +96,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto deleteQuestion(UUID quizId, UUID questionId) {
+    log.info("Deleting question, quizId = {}, questionId = {}", quizId, questionId);
     Question question = selectQuestionForUpdate(quizId, questionId);
     if (question.getQuiz().getQuestions().size() == 1) {
       throw new BadRequestException("A quiz must have at least one question");
@@ -99,6 +108,8 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto addOptionToQuestion(UUID quizId, UUID questionId, OptionDto request) {
+    log.info("adding option to question, quiz = {}, questionId = {}, request = {}", quizId,
+        questionId, request);
     Question question = selectQuestionForUpdate(quizId, questionId);
     if (question.getOptions().size() > 5) {
       throw new BadRequestException("The question already has a maximum number of 5 options");
@@ -112,6 +123,8 @@ class QuizServiceImpl implements QuizService {
   @Override
   public QuizDto updateOption(UUID quizId, UUID questionId, UUID optionId,
                               OptionDto request) {
+    log.info("Updating option, quizId={},questionId={},optionId={},request = {}", quizId,
+        questionId, optionId, request);
     Option option = selectOptionForUpdate(quizId, questionId, optionId);
     option.setCorrect(request.getCorrect());
     option.setText(request.getText());
@@ -121,6 +134,8 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto deleteOption(UUID quizId, UUID questionId, UUID optionId) {
+    log.info("deleting option, quizId={},questionId={},optionId={}", quizId,
+        questionId, optionId);
     Option option = selectOptionForUpdate(quizId, questionId, optionId);
     if (option.getQuestion().getOptions().size() < 2) {
       throw new BadRequestException("Question should have at least 1 answers");
@@ -133,6 +148,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizDto getQuizById(UUID id) {
+    log.info("Getting quiz by id = {}", id);
     Quiz quiz = quizRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
     return buildQuizDto(quiz);
@@ -140,6 +156,8 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public QuizPage getQuizzes(boolean isAuthoredByMe, int pageNo, int limit) {
+    log.info("getting quizzes with params isAuthoredByMe={}, pageNo={},limit = {}", isAuthoredByMe,
+        pageNo, limit);
     String sortBy = isAuthoredByMe ? "updatedAt" : "publishedAt";
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by(sortBy).descending());
     String currentUser =
@@ -155,6 +173,7 @@ class QuizServiceImpl implements QuizService {
 
   @Override
   public void deleteQuizById(UUID id) {
+    log.info("Deleting quiz by id = {}", id);
     Quiz quiz = selectQuizForUpdate(id);
     quizRepository.delete(quiz);
   }
@@ -177,6 +196,7 @@ class QuizServiceImpl implements QuizService {
 
   private void validateQuestion(Question question) {
     long correctAnsCount = question.getOptions().stream().filter(Option::isCorrect).count();
+    log.debug("correctAnsCount = {}", correctAnsCount);
     if (correctAnsCount == 0) {
       throw new BadRequestException("No correct answer provided for the question");
     }
