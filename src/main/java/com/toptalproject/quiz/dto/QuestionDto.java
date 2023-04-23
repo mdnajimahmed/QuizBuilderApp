@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 @Data
 @Builder
 public class QuestionDto {
   private UUID id;
   @NotEmpty(message = "Question text can not be empty")
+  @Length(max = 255, message = "Maximum 255 character is allowed in question text")
   private String text;
   private Boolean skipped;
   private Double score;

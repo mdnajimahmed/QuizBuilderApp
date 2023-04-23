@@ -3,12 +3,12 @@
     - Create a new quiz
     - We can publish the quiz while creating setting `published` flag to true
     - Validations:
-        - Quiz title should be non-empty
+        - Quiz title should be non-empty(255 characters max)
         - Quiz should have at least 1 and at most 10 questions
-        - Each question should have a non-empty text
+        - Each question should have a non-empty text(255 characters max)
         - Each question should have 1 to 5 options
         - Each question should have at least one option selected as correct answer.
-        - Each option should have a non-empty text
+        - Each option should have a non-empty text(255 characters max)
 - GET /quizzes/{id}
     - Gets the details of a quiz by its id
     - Returns 404 if an invalid id is provided.
@@ -137,4 +137,9 @@
     - The Quiz should exist in the system by the id, returns 404 otherwise.
     - The quiz must be created by the requester.
       
-  
+# User management
+The system uses AWS Cognito for IAM. Quiz server is configured as OAuthResource Server to have better SOC.
+- GET /sign-up
+  - Redirects user to web sign up page.
+- GET /welcome
+  - Shows confirmation message to the user after successful sign up.

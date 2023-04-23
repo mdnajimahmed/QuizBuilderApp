@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 @Data
 @Builder
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 public class QuizDto {
   private UUID id;
   @NotEmpty(message = "quiz title can not be empty")
+  @Length(max = 255, message = "Maximum 255 character is allowed in quiz title")
   private String title;
   private Boolean published;
   private LocalDateTime publishedAt;

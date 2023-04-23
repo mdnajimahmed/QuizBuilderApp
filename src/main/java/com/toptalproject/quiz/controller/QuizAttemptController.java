@@ -25,9 +25,9 @@ public class QuizAttemptController {
     this.quizAttemptService = quizAttemptService;
   }
 
-  @PostMapping("/${quizId}")
+  @PostMapping("/{quizId}")
   public QuizDto createAttempt(
-      @Valid @NotNull(message = "Quiz id must be not-null") UUID quizId,
+      @Valid @NotNull(message = "Quiz id must be not-null") @PathVariable("quizId") UUID quizId,
       @RequestBody QuizDto quizAttemptRequest) {
     return quizAttemptService.createQuizAttempt(quizId, quizAttemptRequest);
   }
