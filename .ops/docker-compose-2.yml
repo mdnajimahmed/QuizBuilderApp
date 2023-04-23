@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  postgres:
+    image: ivplay4689/quizapp:c5eb43
+    environment:
+      DB_HOST: rosie.db.elephantsql.com
+      DB_NAME: thtrrxlw
+      DB_PASSWORD: dgw-RnVJfpmUyczz4Ylf206k3atD2Ld4
+      DB_USERNAME: thtrrxlw
+      POOL_ID: ap-southeast-2_5Xy5gOXtg
+      WEB_CLIENT_ID: 3e074qfjrs0ba81g4p8tthhk5u
+      WEB_REDIRECT_URI: http://localhost:8080/welcome
+    ports:
+      - 80:80

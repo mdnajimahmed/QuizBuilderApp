@@ -141,5 +141,7 @@
 The system uses AWS Cognito for IAM. Quiz server is configured as OAuthResource Server to have better SOC.
 - GET /sign-up
   - Redirects user to web sign up page.
+  - Parameters:
+    - clientId : registered client id, if not configured in the server will receive error.
 - GET /welcome
   - Shows confirmation message to the user after successful sign up.
