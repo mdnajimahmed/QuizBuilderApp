@@ -2,8 +2,6 @@ package com.toptalproject.quiz.data.repository;
 
 import com.toptalproject.quiz.data.entity.Quiz;
 import com.toptalproject.quiz.data.entity.QuizAttempt;
-import com.toptalproject.quiz.dto.QuizDto;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
