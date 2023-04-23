@@ -27,12 +27,12 @@ public class Question extends BaseEntity {
       cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
   private List<Option> options = new ArrayList<>();
 
-  public void addOption(Option option) {
+  public void addOption(final Option option) {
     this.options.add(option);
     option.setQuestion(this);
   }
 
-  public void removeOption(Option option) {
+  public void removeOption(final Option option) {
     this.options.remove(option);
     option.setQuestion(null);
   }

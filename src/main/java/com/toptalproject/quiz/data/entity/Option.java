@@ -17,6 +17,6 @@ public class Option extends BaseEntity {
   private String text;
   private boolean isCorrect;
   @ManyToOne
-  @JoinColumn(name="question_id", nullable=false)
+  @JoinColumn(name = "question_id", nullable = false)
   private Question question;
 }

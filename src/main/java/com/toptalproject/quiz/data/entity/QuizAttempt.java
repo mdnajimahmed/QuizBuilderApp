@@ -6,7 +6,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +20,14 @@ import lombok.Setter;
 @Setter
 public class QuizAttempt extends BaseEntity {
   @ManyToOne
-  @JoinColumn(name = "quiz_id", referencedColumnName = "id",nullable = false)
+  @JoinColumn(name = "quiz_id", referencedColumnName = "id", nullable = false)
   private Quiz quiz;
   private double score;
-  @OneToMany(mappedBy = "quizAttempt",fetch = FetchType.EAGER,cascade = {CascadeType.PERSIST,CascadeType.REMOVE})
+  @OneToMany(mappedBy = "quizAttempt", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST,
+      CascadeType.REMOVE})
   private List<QuestionAttempt> questionAttempts = new ArrayList<>();
 
-  public void addQuestionAttempt(QuestionAttempt questionAttempt){
+  public void addQuestionAttempt(final QuestionAttempt questionAttempt) {
     this.questionAttempts.add(questionAttempt);
     questionAttempt.setQuizAttempt(this);
   }
