@@ -97,7 +97,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   private double calculateQuestionScore(Question question,
                                         QuestionDto questionAttemptRequest) {
     boolean isMultipleAnswer =
-        question.getOptions().stream().filter(o -> o.isCorrect()).count() == 1;
+        question.getOptions().stream().filter(Option::isCorrect).count() > 1;
     if (isMultipleAnswer) {
       return calculateMultipleAnswerQuestionScore(question.getOptions(),
           questionAttemptRequest.getOptions());

@@ -61,10 +61,18 @@ class QuizControllerTest {
     deleteQuestion();
     updateQuiz();
     publishQuestion();
+    loadAvailableQuizzesToTake();
     attemptQuiz();
     loadQuizCreatedByMe();
     loadQuizStat();
     loadQuizzesTakenByQuizTaker();
+  }
+
+  private void loadAvailableQuizzesToTake() {
+    QuizPage page = sendRequest(null, quizTaker1,
+        String.format("quizzes/search?page=0&limit=50", quiz.getId()), QuizPage.class,
+        HttpMethod.GET);
+    Assertions.assertEquals(1, page.getQuizzes().size());
   }
 
   private void loadQuizzesTakenByQuizTaker() {
@@ -121,7 +129,7 @@ class QuizControllerTest {
 
         )).build();
 
-    quizAttempt = sendRequest(dto, quizTaker1, "attempts",
+    quizAttempt = sendRequest(dto, quizTaker1, String.format("attempts/%s",quiz.getId()),
         QuizDto.class, HttpMethod.POST);
     Assertions.assertEquals(-0.8333333333333334, quizAttempt.getScore(), 1e-6);
     Assertions.assertEquals(-1.0, quizAttempt.getQuestions().get(0).getScore(), 1e-6);
@@ -163,7 +171,7 @@ class QuizControllerTest {
 
   private void updateQuestion() {
     String title = "Which is the largest state in the USA";
-    QuestionDto questionDto = QuestionDto.builder().text(title).multipleAnswer(false).build();
+    QuestionDto questionDto = QuestionDto.builder().text(title).build();
     quiz = sendRequest(questionDto, quizAuthorToken,
         String.format("quizzes/%s/questions/%s", quiz.getId(), newQuestion.getId()), QuizDto.class,
         HttpMethod.PUT);
@@ -227,7 +235,7 @@ class QuizControllerTest {
 
   private void addQuestion() {
     String title = "Which is the largest state in the United States of America";
-    QuestionDto questionDto = QuestionDto.builder().text(title).multipleAnswer(false).options(
+    QuestionDto questionDto = QuestionDto.builder().text(title).options(
         Arrays.asList(OptionDto.builder().text("Texas").correct(false).build(),
             OptionDto.builder().text("Alaska").correct(true).build())).build();
     quiz = sendRequest(questionDto, quizAuthorToken,
@@ -240,10 +248,10 @@ class QuizControllerTest {
 
   private void createQuiz() {
     QuizDto dto = QuizDto.builder().title("My first quiz").published(false).questions(Arrays.asList(
-        QuestionDto.builder().text("Moon is a star").multipleAnswer(false).options(
+        QuestionDto.builder().text("Moon is a star").options(
             Arrays.asList(OptionDto.builder().text("Yes").correct(false).build(),
                 OptionDto.builder().text("No").correct(true).build())).build(),
-        QuestionDto.builder().text("Temperature can be measured in").multipleAnswer(true).options(
+        QuestionDto.builder().text("Temperature can be measured in").options(
             Arrays.asList(
                 OptionDto.builder().text("Kelvin").correct(true).build(),
                 OptionDto.builder().text("Fahrenheit").correct(true).build(),
