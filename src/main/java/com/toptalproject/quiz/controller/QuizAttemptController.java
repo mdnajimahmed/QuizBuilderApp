@@ -21,31 +21,33 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuizAttemptController {
   private final QuizAttemptService quizAttemptService;
 
-  public QuizAttemptController(QuizAttemptService quizAttemptService) {
+  public QuizAttemptController(final QuizAttemptService quizAttemptService) {
     this.quizAttemptService = quizAttemptService;
   }
 
   @PostMapping("/{quizId}")
   public QuizDto createAttempt(
-      @Valid @NotNull(message = "Quiz id must be not-null") @PathVariable("quizId") UUID quizId,
-      @RequestBody QuizDto quizAttemptRequest) {
+      @Valid @NotNull(message = "Quiz id must be not-null")
+      @PathVariable("quizId") final UUID quizId,
+      @RequestBody final QuizDto quizAttemptRequest) {
     return quizAttemptService.createQuizAttempt(quizId, quizAttemptRequest);
   }
 
   @GetMapping
   public QuizPage getAttempts(
       @RequestParam("page")
-      @Valid @Min(value = 0, message = "Page number needs to be non zero") int page,
-      @RequestParam("limit") @Min(1) @Max(100) int limit) {
+      @Valid @Min(value = 0, message = "Page number needs to be non zero") final int page,
+      @RequestParam("limit") @Min(1) @Max(100) final int limit) {
     return quizAttemptService.getAttempts(page, limit);
   }
 
   @GetMapping("/stat/{quizId}")
   public QuizPage getQuizStat(
-      @PathVariable("quizId") @Valid @NotNull(message = "Quiz id can not be null") UUID quizId,
+      @PathVariable("quizId") @Valid @NotNull(message = "Quiz id can not be null")
+      final UUID quizId,
       @RequestParam("page")
-      @Valid @Min(value = 0, message = "Page number needs to be non zero") int pageNo,
-      @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
+      @Valid @Min(value = 0, message = "Page number needs to be non zero") final int pageNo,
+      @RequestParam("limit") @Min(1) @Max(100) final int limit) {
     return quizAttemptService.getQuizStat(quizId, pageNo, limit);
   }
 }

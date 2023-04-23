@@ -169,7 +169,7 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   }
 
   @Override
-  public QuizPage getQuizStat(UUID id, int pageNo, Integer limit) {
+  public QuizPage getQuizStat(UUID id, int pageNo, int limit) {
     log.info("Getting quiz stat for id = {} , page = {}, limit = {}",
         id, pageNo, limit);
     Quiz quiz = quizRepository.findById(id)

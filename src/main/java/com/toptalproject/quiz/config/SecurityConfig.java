@@ -11,8 +11,6 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -26,7 +24,7 @@ public class SecurityConfig {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/welcome","/sign-up","/error","/").permitAll()
+            .requestMatchers("/welcome", "/sign-up", "/error", "/").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
@@ -35,8 +33,8 @@ public class SecurityConfig {
 
   @Bean
   public AuditorAware<String> auditorAware() {
-    return ()-> {
-      Jwt claims = (Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    return () -> {
+      Jwt claims = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
       return Optional.of(claims.getClaimAsString("email"));
     };
   }

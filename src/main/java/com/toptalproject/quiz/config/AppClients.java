@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Data
 public class AppClients {
   private List<AppClient> clientConfigs;
+
   @Data
   public static class AppClient {
     private String clientId;

@@ -28,93 +28,92 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @Slf4j
 public class QuizController {
-  public QuizController(QuizService quizService) {
+  public QuizController(final QuizService quizService) {
     this.quizService = quizService;
   }
 
   private final QuizService quizService;
 
   @GetMapping("/{id}")
-  public QuizDto getQuizById(@PathVariable("id") UUID id) {
+  public QuizDto getQuizById(@PathVariable("id") final UUID id) {
     return quizService.getQuizById(id);
   }
 
   @GetMapping
   public QuizPage getQuizzesAuthoredByMe(
-      @RequestParam("page")
-      @Valid @Min(value = 0, message = "Page number needs to be non zero") int pageNo,
-      @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
+      @RequestParam("page") @Valid @Min(value = 0, message = "Page number needs to be non zero")
+      final int pageNo, @RequestParam("limit") @Min(1) @Max(100) final int limit) {
     return quizService.getQuizzes(true, pageNo, limit);
   }
 
   @GetMapping("/search")
   public QuizPage searchQuiz(
-      @RequestParam("page")
-      @Valid @Min(value = 0, message = "Page number needs to be non zero") int pageNo,
-      @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
+      @RequestParam("page") @Valid @Min(value = 0, message = "Page number needs to be non zero")
+      final int pageNo, @RequestParam("limit") @Min(1) @Max(100) final int limit) {
     return quizService.getQuizzes(false, pageNo, limit);
   }
 
 
   @PostMapping
-  public QuizDto createQuiz(@Valid @RequestBody QuizDto request) {
+  public QuizDto createQuiz(@Valid @RequestBody final QuizDto request) {
     return quizService.createQuiz(request);
   }
 
   @PutMapping("/{id}")
-  public QuizDto updateQuiz(@PathVariable("id") UUID id, @Valid @RequestBody QuizInfoDto request) {
+  public QuizDto updateQuiz(@PathVariable("id") UUID id,
+                            @Valid @RequestBody final QuizInfoDto request) {
     return quizService.updateQuiz(id, request);
   }
 
   @DeleteMapping("/{id}")
-  public void deleteQuizById(@PathVariable("id") UUID id) {
+  public void deleteQuizById(@PathVariable("id") final UUID id) {
     quizService.deleteQuizById(id);
   }
 
 
   @PutMapping("/{id}/publish")
-  public QuizDto publishQuiz(@PathVariable("id") UUID id) {
+  public QuizDto publishQuiz(@PathVariable("id") final UUID id) {
     return quizService.publishQuiz(id);
   }
 
   @PostMapping("/{id}/questions")
-  public QuizDto addQuestion(@PathVariable("id") UUID quizId,
-                             @Valid @RequestBody QuestionDto request) {
+  public QuizDto addQuestion(@PathVariable("id") final UUID quizId,
+                             @Valid @RequestBody final QuestionDto request) {
     return quizService.addQuestion(quizId, request);
   }
 
   @PutMapping("/{id}/questions/{questionId}")
-  public QuizDto updateQuestion(@PathVariable("id") UUID quizId,
-                                @PathVariable("questionId") UUID questionId,
-                                @Valid @RequestBody QuestionInfoDto request) {
+  public QuizDto updateQuestion(@PathVariable("id") final UUID quizId,
+                                @PathVariable("questionId") final UUID questionId,
+                                @Valid @RequestBody final QuestionInfoDto request) {
     return quizService.updateQuestion(quizId, questionId, request);
   }
 
   @DeleteMapping("/{id}/questions/{questionId}")
-  public QuizDto deleteQuestion(@PathVariable("id") UUID quizId,
-                                @PathVariable("questionId") UUID questionId) {
+  public QuizDto deleteQuestion(@PathVariable("id") final UUID quizId,
+                                @PathVariable("questionId") final UUID questionId) {
     return quizService.deleteQuestion(quizId, questionId);
   }
 
   @PostMapping("/{id}/questions/{questionId}/options")
-  public QuizDto addOption(@PathVariable("id") UUID quizId,
-                           @PathVariable("questionId") UUID questionId,
-                           @Valid @RequestBody OptionDto request) {
+  public QuizDto addOption(@PathVariable("id") final UUID quizId,
+                           @PathVariable("questionId") final UUID questionId,
+                           @Valid @RequestBody final OptionDto request) {
     return quizService.addOptionToQuestion(quizId, questionId, request);
   }
 
   @PutMapping("/{id}/questions/{questionId}/options/{optionId}")
-  public QuizDto updateOption(@PathVariable("id") UUID quizId,
-                              @PathVariable("questionId") UUID questionId,
-                              @PathVariable("optionId") UUID optionId,
-                              @Valid @RequestBody OptionDto request) {
+  public QuizDto updateOption(@PathVariable("id") final UUID quizId,
+                              @PathVariable("questionId") final UUID questionId,
+                              @PathVariable("optionId") final UUID optionId,
+                              @Valid @RequestBody final OptionDto request) {
     return quizService.updateOption(quizId, questionId, optionId, request);
   }
 
   @DeleteMapping("/{id}/questions/{questionId}/options/{optionId}")
-  public QuizDto deleteOption(@PathVariable("id") UUID quizId,
-                              @PathVariable("questionId") UUID questionId,
-                              @PathVariable("optionId") UUID optionId) {
+  public QuizDto deleteOption(@PathVariable("id") final UUID quizId,
+                              @PathVariable("questionId") final UUID questionId,
+                              @PathVariable("optionId") final UUID optionId) {
     return quizService.deleteOption(quizId, questionId, optionId);
   }
 }
