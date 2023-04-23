@@ -141,10 +141,16 @@ class QuizServiceImpl implements QuizService {
   }
 
   @Override
-  public QuizPage getQuiz(int pageNo, int limit) {
+  public QuizPage getQuizzes(boolean isAuthoredByMe, int pageNo, int limit) {
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
-    Page<QuizDto> currentPage = quizRepository.findAll(pageRequest).map(this::buildQuizDto);
-    return new QuizPage(currentPage.getContent(), pageNo, currentPage.getTotalPages(), limit);
+    String currentUser =
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+    Page<Quiz> currentQuizPage =
+        isAuthoredByMe ? quizRepository.findByCreatedBy(currentUser, pageRequest) :
+            quizRepository.findByCreatedByNot(currentUser, pageRequest);
+    Page<QuizDto> currentQuizDtoPage = currentQuizPage.map(this::buildQuizDto);
+    return new QuizPage(currentQuizDtoPage.getContent(), pageNo, currentQuizDtoPage.getTotalPages(), limit);
   }
 
   @Override
@@ -208,7 +214,10 @@ class QuizServiceImpl implements QuizService {
     if (quiz.isPublished()) {
       throw new BadRequestException("A published quiz can not be updated");
     }
-    String aud = principal.getCurrentAuditor().orElse(null);
+    String aud =
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+
     if (!quiz.getCreatedBy().equals(aud)) {
       throw new BadRequestException("Quiz ownership check failed");
     }

@@ -2,4 +2,48 @@
   - Create a new quiz
   - We can publish the quiz while creating setting `published` flag to true
   - Validations:
-    - 
+    - Quiz title should be non-empty
+    - Quiz should have at least 1 and at most 10 questions
+    - Each question should have a non-empty text
+    - Each question should have 1 to 5 options
+    - Each question should have at least one option selected as correct answer.
+    - Each option should have a non-empty text
+- GET /quizzes/{id}
+  - Gets the details of a quiz by its id
+  - Returns 404 if an invalid id is provided.
+- GET /quizzes
+  - Returns all the quizzes authored by me.
+  - Query Params:
+    - pageNo: select a page from the result set
+    - limit: number of items per page.
+  - Validations:
+    - page no must be non-zero
+    - limit must be between 1 and 100(inclusive).
+- GET /quizzes/search
+  - Returns all the quizzes authored by other users which I can take as a user
+  - Query Params:
+    - pageNo: select a page from the result set
+    - limit: number of items per page.
+  - Validations:
+    - page no must be non-zero
+    - limit must be between 1 and 100(inclusive).
+- PUT /quizzes/{id}
+  - Update meta data of a quiz. Supported properties
+    - Title
+  - Validations:
+    - Quiz title should be non-empty.
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester.
+- DELETE /quizzes/{id}
+  - Delete a quiz by id.
+  - Validations:
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester. 
+- PUT /quizzes/{id}/publish
+  - Publish a quiz
+  - Validations:
+    - Quiz should exist in the system by the id, returns 404 otherwise.
+    - Quiz should be in unpublished state.
+    - The quiz must be authored by the requester. 

@@ -38,12 +38,20 @@ public class QuizController {
   }
 
   @GetMapping
-  public QuizPage getQuiz(
+  public QuizPage getQuizzesAuthoredByMe(
       @RequestParam("page")
       @Valid @Min(value = 0, message = "Page number needs to be non zero") int pageNo,
       @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
-    return quizService.getQuiz(pageNo, limit);
+    return quizService.getQuizzes(true, pageNo, limit);
   }
+  @GetMapping("/search")
+  public QuizPage searchQuiz(
+      @RequestParam("page")
+      @Valid @Min(value = 0, message = "Page number needs to be non zero") int pageNo,
+      @RequestParam("limit") @Min(1) @Max(100) Integer limit) {
+    return quizService.getQuizzes(false, pageNo, limit);
+  }
+
 
   @PostMapping
   public QuizDto createQuiz(@Valid @RequestBody QuizDto request) {
@@ -67,7 +75,8 @@ public class QuizController {
   }
 
   @PostMapping("/{id}/questions")
-  public QuizDto addQuestion(@PathVariable("id") UUID quizId, @Valid @RequestBody QuestionDto request) {
+  public QuizDto addQuestion(@PathVariable("id") UUID quizId,
+                             @Valid @RequestBody QuestionDto request) {
     return quizService.addQuestion(quizId, request);
   }
 

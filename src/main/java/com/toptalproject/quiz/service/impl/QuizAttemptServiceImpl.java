@@ -42,13 +42,15 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   public QuizDto createQuizAttempt(QuizDto request) {
     Quiz quiz = quizRepository.findById(request.getId()).orElseThrow(
         () -> new NotFoundException(Quiz.class.getCanonicalName(), request.getId()));
-    if (quiz.getCreatedBy().equals(principal.getCurrentAuditor().get())) {
+    String currentUser =
+        principal.getCurrentAuditor().orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+    if (quiz.getCreatedBy().equals(currentUser)) {
       throw new BadRequestException("user can not take his own quiz");
     }
     if (!quiz.isPublished()) {
       throw new BadRequestException("Quiz has not published yet");
     }
-    if (quizAttemptRepository.existsByQuizAndCreatedBy(quiz, principal.getCurrentAuditor().get())) {
+    if (quizAttemptRepository.existsByQuizAndCreatedBy(quiz, currentUser)) {
       throw new BadRequestException("user has already attempted the quiz");
     }
     QuizAttempt quizAttempt = new QuizAttempt();
@@ -145,8 +147,10 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   @Override
   public QuizPage getAttempts(int pageNo, int limit) {
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
+    String currentUser =
+        principal.getCurrentAuditor().orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
     Page<QuizDto> currentPage =
-        quizAttemptRepository.findByCreatedBy(principal.getCurrentAuditor().get(), pageRequest)
+        quizAttemptRepository.findByCreatedBy(currentUser, pageRequest)
             .map(this::buildQuizAttemptDto);
     return new QuizPage(currentPage.getContent(), pageNo, currentPage.getTotalPages(), limit);
   }
@@ -155,7 +159,9 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
   public QuizPage getQuizStat(UUID id, int pageNo, Integer limit) {
     Quiz quiz = quizRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
-    if (!quiz.getCreatedBy().equals(principal.getCurrentAuditor().get())) {
+    String currentUser =
+        principal.getCurrentAuditor().orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+    if (!quiz.getCreatedBy().equals(currentUser)) {
       throw new BadRequestException("user can not view stat created by others");
     }
     PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by("createdAt").descending());
