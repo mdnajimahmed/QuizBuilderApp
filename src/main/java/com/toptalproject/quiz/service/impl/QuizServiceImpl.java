@@ -5,6 +5,7 @@ import com.toptalproject.quiz.data.entity.Question;
 import com.toptalproject.quiz.data.entity.Quiz;
 import com.toptalproject.quiz.data.repository.OptionRepository;
 import com.toptalproject.quiz.data.repository.QuestionRepository;
+import com.toptalproject.quiz.data.repository.QuizAttemptRepository;
 import com.toptalproject.quiz.data.repository.QuizRepository;
 import com.toptalproject.quiz.dto.OptionDto;
 import com.toptalproject.quiz.dto.QuestionDto;
@@ -33,12 +34,16 @@ class QuizServiceImpl implements QuizService {
   private final OptionRepository optionRepository;
   private final AuditorAware<String> principal;
 
+  private final QuizAttemptRepository quizAttemptRepository;
+
   QuizServiceImpl(final QuizRepository quizRepository, final QuestionRepository questionRepository,
-                  final OptionRepository optionRepository, final AuditorAware<String> principal) {
+                  final OptionRepository optionRepository, final AuditorAware<String> principal,
+                  final QuizAttemptRepository quizAttemptRepository) {
     this.quizRepository = quizRepository;
     this.questionRepository = questionRepository;
     this.optionRepository = optionRepository;
     this.principal = principal;
+    this.quizAttemptRepository = quizAttemptRepository;
   }
 
   @Override
@@ -180,9 +185,10 @@ class QuizServiceImpl implements QuizService {
   @Override
   public void deleteQuizById(final UUID id) {
     log.info("Deleting quiz by id = {}", id);
-    final Quiz quiz = selectQuizForUpdate(id);
+    final Quiz quiz = selectQuizForDelete(id);
     quizRepository.delete(quiz);
   }
+
 
   private Question mapToQuestion(final QuestionDto questionRequest) {
     final Question question = new Question();
@@ -245,7 +251,7 @@ class QuizServiceImpl implements QuizService {
             .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
 
     if (!quiz.getCreatedBy().equals(aud)) {
-      throw new BadRequestException("Quiz ownership check failed");
+      throw new BadRequestException("Quiz not created by the requester");
     }
     return quiz;
   }
@@ -263,6 +269,21 @@ class QuizServiceImpl implements QuizService {
     final Question question = selectQuestionForUpdate(quizId, questionId);
     return question.getOptions().stream().filter(a -> a.getId().equals(optionId)).findAny()
         .orElseThrow(() -> new NotFoundException(Option.class.getCanonicalName(), optionId));
+  }
+
+  private Quiz selectQuizForDelete(UUID id) {
+    final Quiz quiz = quizRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
+    final String aud =
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+    if (!quiz.getCreatedBy().equals(aud)) {
+      throw new BadRequestException("Quiz not created by the requester");
+    }
+    if (quizAttemptRepository.existsByQuiz(quiz)) {
+      throw new BadRequestException("Quiz already taken by other users");
+    }
+    return quiz;
   }
 
 }

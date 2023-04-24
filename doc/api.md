@@ -1,7 +1,7 @@
 # Quiz management APIs:
 - POST /quizzes
     - Create a new quiz
-    - We can publish the quiz while creating setting `published` flag to true
+    - We can publish the quiz while creating by setting `published` flag to true
     - Validations:
         - Quiz title should be non-empty(255 characters max)
         - Quiz should have at least 1 and at most 10 questions
@@ -118,6 +118,7 @@
     - The quiz must be created by other users.
     - The quiz must be in published state.
     - The user has not already attempted the quiz.
+    - The single answer question must have at most one answer selected.
   - It is possible that the user has not attempted any question under a quiz attempt!
 - GET /attempts
   - See the list of quizzes attempted the user herself. (The list will be sorted from latest to oldest attempt)

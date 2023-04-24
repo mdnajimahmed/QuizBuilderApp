@@ -122,9 +122,6 @@ class QuizAttemptServiceImpl implements QuizAttemptService {
     if (selectedOptions.isEmpty()) {
       return 0;
     }
-    if (selectedOptions.size() == 1) {
-      throw new BadRequestException("Expected more than one answer for multiple answer question");
-    }
     final double correct = options.stream().filter(Option::isCorrect).count();
     final double incorrect = options.size() - correct;
     double score = 0;

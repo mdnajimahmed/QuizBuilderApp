@@ -1,0 +1,1298 @@
+{
+	"info": {
+		"_postman_id": "6e258023-8ca4-4962-b2ea-4b272ee97102",
+		"name": "toptal",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "254033"
+	},
+	"item": [
+		{
+			"name": "quiz-creator-token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"console.log(\"response\",responseJson)",
+							"pm.environment.set(\"__token__\",responseJson['AuthenticationResult']['IdToken'])"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const clientSecret = pm.environment.get(\"clientSecret\")",
+							"const clientId = pm.environment.get(\"clientId\")",
+							"const email = pm.environment.get(\"quizCreatorEmail\")",
+							"",
+							"pm.sendRequest(\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\", (error, response) => {",
+							"    if (error || response.code !== 200) {",
+							"        pm.expect.fail('Could not load external library');",
+							"    }",
+							"    eval(response.text());",
+							"    const CryptoJS = require('crypto-js');",
+							"    const digest = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(email + clientId, clientSecret));",
+							"    pm.environment.set(\"__secretHash__\",digest.toString())",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-amz-json-1.1",
+						"type": "text"
+					},
+					{
+						"key": "x-amz-target",
+						"value": "AWSCognitoIdentityProviderService.InitiateAuth",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AuthFlow\": \"USER_PASSWORD_AUTH\",\n    \"ClientId\": \"{{clientId}}\",\n    \"AuthParameters\": {\n        \"USERNAME\": \"{{quizCreatorEmail}}\",\n        \"PASSWORD\":\"{{password}}\",\n        \"SECRET_HASH\": \"{{__secretHash__}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cognito-idp.ap-southeast-2.amazonaws.com/",
+					"protocol": "https",
+					"host": [
+						"cognito-idp",
+						"ap-southeast-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    const response = pm.response.json()",
+							"    pm.expect(response.id).not.be.empty;",
+							"    pm.expect(response.published).to.equal(false);",
+							"    pm.expect(response.publishedAt).to.be.undefined;",
+							"    pm.expect(response.title).to.equal(\"The QuizApp Demo\"); ",
+							"",
+							"    pm.expect(response.questions.length).to.equal(2); ",
+							"",
+							"    // validate first qustion",
+							"    pm.expect(response.questions[0].id).not.be.empty;",
+							"    pm.expect(response.questions[0].text).to.equal(\"Moon is a star\");",
+							"    ",
+							"",
+							"    pm.expect(response.questions[0].options.length).to.equal(2);",
+							"    pm.expect(response.questions[0].options[0].id).not.be.empty;",
+							"    pm.expect(response.questions[0].options[0].text).to.equal(\"Yes\");",
+							"    pm.expect(response.questions[0].options[0].correct).to.equal(false);",
+							"",
+							"    pm.expect(response.questions[0].options[1].id).not.be.empty;",
+							"    pm.expect(response.questions[0].options[1].text).to.equal(\"No\");",
+							"    pm.expect(response.questions[0].options[1].correct).to.equal(true);",
+							"",
+							"    // validate second qustion",
+							"    ",
+							"    pm.expect(response.questions[1].id).not.be.empty;",
+							"    pm.expect(response.questions[1].text).to.equal(\"Temperature can be measured in\");",
+							"    ",
+							"",
+							"    pm.expect(response.questions[1].options.length).to.equal(5);",
+							"    pm.expect(response.questions[1].options[0].id).not.be.empty;",
+							"    pm.expect(response.questions[1].options[0].text).to.equal(\"Kelvin\");",
+							"    pm.expect(response.questions[1].options[0].correct).to.equal(true);",
+							"",
+							"    pm.expect(response.questions[1].options[1].id).not.be.empty;",
+							"    pm.expect(response.questions[1].options[1].text).to.equal(\"Fahrenheit\");",
+							"    pm.expect(response.questions[1].options[1].correct).to.equal(true);",
+							"",
+							"    pm.expect(response.questions[1].options[2].id).not.be.empty;",
+							"    pm.expect(response.questions[1].options[2].text).to.equal(\"Gram\");",
+							"    pm.expect(response.questions[1].options[2].correct).to.equal(false);",
+							"",
+							"    pm.expect(response.questions[1].options[3].id).not.be.empty;",
+							"    pm.expect(response.questions[1].options[3].text).to.equal(\"Celsius\");",
+							"    pm.expect(response.questions[1].options[3].correct).to.equal(true);",
+							"",
+							"    pm.expect(response.questions[1].options[4].id).not.be.empty;",
+							"    pm.expect(response.questions[1].options[4].text).to.equal(\"Liters\");",
+							"    pm.expect(response.questions[1].options[4].correct).to.equal(false);",
+							"",
+							"    pm.environment.set(\"__response__\", JSON.stringify(response));",
+							"",
+							"    pm.environment.set(\"__quizId__\", response.id);",
+							"     pm.environment.set(\"__question_1_id__\",response.questions[0].id)",
+							"    pm.environment.set(\"__question_1_ans_1_id__\",response.questions[0].options[0].id)",
+							"",
+							"    pm.environment.set(\"__question_2_id__\",response.questions[1].id)",
+							"    pm.environment.set(\"__question_2_ans_1_id__\",response.questions[1].options[0].id)",
+							"    pm.environment.set(\"__question_2_ans_2_id__\",response.questions[1].options[1].id)",
+							"    pm.environment.set(\"__question_2_ans_3_id__\",response.questions[1].options[2].id)",
+							"",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"The QuizApp Demo\",\n    \"published\": false,\n    \"questions\": [\n        {\n            \"text\": \"Moon is a star\",\n            \"options\": [\n                {\n                    \"text\": \"Yes\",\n                    \"correct\": false\n                },\n                {\n                    \"text\": \"No\",\n                    \"correct\": true\n                }\n            ]\n        },\n        {\n            \"text\": \"Temperature can be measured in\",\n            \"options\": [\n                {\n                    \"text\": \"Kelvin\",\n                    \"correct\": true\n                },\n                {\n                    \"text\": \"Fahrenheit\",\n                    \"correct\": true\n                },\n                {\n                    \"text\": \"Gram\",\n                    \"correct\": false\n                },\n                {\n                    \"text\": \"Celsius\",\n                    \"correct\": true\n                },\n                {\n                    \"text\": \"Liters\",\n                    \"correct\": false\n                }\n            ]\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add-question",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    const response = pm.response.json()",
+							"    pm.environment.set(\"__question_3_id__\",response.questions[2].id)",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"What is the capital of Bangladesh\",\n    \"multipleAnswer\": false,\n    \"options\": [\n        {\n            \"text\": \"Dhaka\",\n            \"correct\": true\n        },\n        {\n            \"text\": \"Khulna\",\n            \"correct\": false\n        }\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/questions",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"questions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add-option",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    const response = pm.response.json()",
+							"    ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"Barisal\",\n    \"correct\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/questions/{{__question_3_id__}}/options",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"questions",
+						"{{__question_3_id__}}",
+						"options"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-option",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"Watt\",\n    \"correct\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/questions/{{__question_2_id__}}/options/{{__question_2_ans_1_id__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"questions",
+						"{{__question_2_id__}}",
+						"options",
+						"{{__question_2_ans_1_id__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-option",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/questions/{{__question_2_id__}}/options/{{__question_2_ans_1_id__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"questions",
+						"{{__question_2_id__}}",
+						"options",
+						"{{__question_2_ans_1_id__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-question",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"text\": \"What is the capital of Bangladesh?\",\n    \"multipleAnswer\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/questions/{{__question_3_id__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"questions",
+						"{{__question_3_id__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-question",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/questions/{{__question_3_id__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"questions",
+						"{{__question_3_id__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update-quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"The QuizApp Demo (Toptal)\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "publish-quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"    pm.expect(response.publishedAt).not.be.empty;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/{{__quizId__}}/publish",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"{{__quizId__}}",
+						"publish"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "quiz-taker-token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseJson = pm.response.json();",
+							"console.log(\"response\",responseJson)",
+							"pm.environment.set(\"__token2__\",responseJson['AuthenticationResult']['IdToken'])"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const clientSecret = pm.environment.get(\"clientSecret\")",
+							"const clientId = pm.environment.get(\"clientId\")",
+							"const email = pm.environment.get(\"quizTaker1Email\")",
+							"",
+							"pm.sendRequest(\"https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js\", (error, response) => {",
+							"    if (error || response.code !== 200) {",
+							"        pm.expect.fail('Could not load external library');",
+							"    }",
+							"    eval(response.text());",
+							"    const CryptoJS = require('crypto-js');",
+							"    const digest = CryptoJS.enc.Base64.stringify(CryptoJS.HmacSHA256(email + clientId, clientSecret));",
+							"    pm.environment.set(\"__secretHash2__\",digest.toString())",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-amz-json-1.1",
+						"type": "text"
+					},
+					{
+						"key": "x-amz-target",
+						"value": "AWSCognitoIdentityProviderService.InitiateAuth",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"AuthFlow\": \"USER_PASSWORD_AUTH\",\n    \"ClientId\": \"{{clientId}}\",\n    \"AuthParameters\": {\n        \"USERNAME\": \"{{quizTaker1Email}}\",\n        \"PASSWORD\":\"{{password}}\",\n        \"SECRET_HASH\": \"{{__secretHash2__}}\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cognito-idp.ap-southeast-2.amazonaws.com/",
+					"protocol": "https",
+					"host": [
+						"cognito-idp",
+						"ap-southeast-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-available-quiz-to-take",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token2__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes/search?page=0&limit=50",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes",
+						"search"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "attempt-quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token2__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{__quizId__}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/attempts/{{__quizId__}}",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"attempts",
+						"{{__quizId__}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "quiz-taken-by-me",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token2__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/attempts?page=0&limit=50",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"attempts"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "quiz-created-by-me",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"response should be okay to process\", function () { ",
+							"    pm.response.to.not.be.error; ",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/quizzes?page=0&limit=50",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"quizzes"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "my-quiz-taken-by-others",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true,
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{__token__}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{endpoint}}/attempts/stat/{{__quizId__}}?page=0&limit=50",
+					"host": [
+						"{{endpoint}}"
+					],
+					"path": [
+						"attempts",
+						"stat",
+						"{{__quizId__}}"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "limit",
+							"value": "50"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "tokenName",
+				"value": "access_token",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "queryParams",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
