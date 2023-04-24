@@ -9,6 +9,7 @@
         - Each question should have 1 to 5 options
         - Each question should have at least one option selected as correct answer.
         - Each option should have a non-empty text(255 characters max)
+        - Quizzes of a user should have unique title.
 - GET /quizzes/{id}
     - Gets the details of a quiz by its id
     - Returns 404 if an invalid id is provided.
@@ -33,6 +34,7 @@
         - Title
     - Validations:
         - Quiz title should be non-empty.
+        - Quizzes of a user should have unique title.
         - Quiz should exist in the system by the id, returns 404 otherwise.
         - Quiz should be in unpublished state.
         - The quiz must be authored by the requester.
