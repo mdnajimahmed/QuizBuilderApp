@@ -43,14 +43,14 @@ public class QuizController {
   public QuizPage getQuizzesAuthoredByMe(
       @RequestParam("page") @Valid @Min(value = 0, message = "Page number needs to be non zero")
       final int pageNo, @RequestParam("limit") @Min(1) @Max(100) final int limit) {
-    return quizService.getQuizzes(true, pageNo, limit);
+    return quizService.getQuizzesAuthoredByMe(pageNo, limit);
   }
 
   @GetMapping("/search")
   public QuizPage searchQuiz(
       @RequestParam("page") @Valid @Min(value = 0, message = "Page number needs to be non zero")
       final int pageNo, @RequestParam("limit") @Min(1) @Max(100) final int limit) {
-    return quizService.getQuizzes(false, pageNo, limit);
+    return quizService.getAvailableQuizzesToTake(pageNo, limit);
   }
 
 

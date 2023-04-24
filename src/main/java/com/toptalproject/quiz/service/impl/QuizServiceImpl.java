@@ -17,6 +17,7 @@ import com.toptalproject.quiz.error.BadRequestException;
 import com.toptalproject.quiz.error.NotFoundException;
 import com.toptalproject.quiz.service.QuizService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -166,18 +167,18 @@ class QuizServiceImpl implements QuizService {
   }
 
   @Override
-  public QuizPage getQuizzes(final boolean isAuthoredByMe, final int pageNo, final int limit) {
-    log.info("getting quizzes with params isAuthoredByMe={}, pageNo={},limit = {}", isAuthoredByMe,
-        pageNo, limit);
-    final String sortBy = isAuthoredByMe ? "updatedAt" : "publishedAt";
-    final PageRequest pageRequest = PageRequest.of(pageNo, limit, Sort.by(sortBy).descending());
+  public QuizPage getQuizzesAuthoredByMe(final int pageNo, final int limit) {
     final String currentUser =
         principal.getCurrentAuditor()
             .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
-    final Page<Quiz> currentQuizPage =
-        isAuthoredByMe ? quizRepository.findByCreatedBy(currentUser, pageRequest) :
-            quizRepository.findByCreatedByNotAndPublishedTrue(currentUser, pageRequest);
-    final Page<QuizDto> currentQuizDtoPage = currentQuizPage.map(this::buildQuizDto);
+    log.info("getting quizzes with authored by ={}, pageNo={},limit = {}", currentUser,
+        pageNo, limit);
+
+    final PageRequest pageRequest =
+        PageRequest.of(pageNo, limit, Sort.by("updatedAt").descending());
+    final Page<QuizDto> currentQuizDtoPage =
+        quizRepository.findByCreatedBy(currentUser, pageRequest)
+            .map(this::buildQuizDto);
     return new QuizPage(currentQuizDtoPage.getContent(), pageNo, currentQuizDtoPage.getTotalPages(),
         limit);
   }
@@ -187,6 +188,18 @@ class QuizServiceImpl implements QuizService {
     log.info("Deleting quiz by id = {}", id);
     final Quiz quiz = selectQuizForDelete(id);
     quizRepository.delete(quiz);
+  }
+
+  @Override
+  public QuizPage getAvailableQuizzesToTake(int pageNo, int limit) {
+    final String currentUser =
+        principal.getCurrentAuditor()
+            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+    final List<QuizDto> quizzes =
+        quizRepository.findAvailableQuizzesToTake(currentUser, pageNo * limit, limit)
+            .stream().map(this::buildQuizDto).toList();
+    final int count = quizRepository.countAvailableQuizzesToTake(currentUser);
+    return new QuizPage(quizzes, pageNo, (count + limit - 1 )/ limit, limit);
   }
 
 
