@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   quizapp:
-    image: ivplay4689/quizapp:96d874
+    image: ivplay4689/quizapp:049ec3
     environment:
       DB_HOST: postgres
       DB_NAME: postgres

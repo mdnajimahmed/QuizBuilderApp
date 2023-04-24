@@ -1,6 +1,9 @@
 # Live URI:
 - https://d3dsh9jnfe1rsv.cloudfront.net
 
+# Demo:
+- A short demo can be found in the folder demo.
+
 # API introduction:
 - To get an overview of the APIs please read api.md file from the doc folder.
 - To know the configurations for the application please read configuration.md file from the doc folder.
