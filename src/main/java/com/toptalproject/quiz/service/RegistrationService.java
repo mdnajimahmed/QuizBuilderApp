@@ -1,5 +1,7 @@
 package com.toptalproject.quiz.service;
 
+import java.util.Optional;
+
 public interface RegistrationService {
-  String getRedirectUri(String clientId);
+  String getRedirectUri(Optional<String> clientId);
 }

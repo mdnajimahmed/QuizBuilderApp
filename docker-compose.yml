@@ -9,7 +9,7 @@ services:
       DB_USERNAME: postgres
       POOL_ID: ap-southeast-2_5Xy5gOXtg
       WEB_CLIENT_ID: 3e074qfjrs0ba81g4p8tthhk5u
-      WEB_REDIRECT_URI: http://localhost/welcome
+      WEB_REDIRECT_URI: http://localhost:8080/welcome
     ports:
       - 80:80
   postgres:
