@@ -24,7 +24,7 @@ public class SecurityConfig {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/welcome", "/sign-up", "/error", "/").permitAll()
+            .requestMatchers("/welcome","/sign-up","/error","/").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
@@ -33,8 +33,8 @@ public class SecurityConfig {
 
   @Bean
   public AuditorAware<String> auditorAware() {
-    return () -> {
-      Jwt claims = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    return ()-> {
+      Jwt claims = (Jwt)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
       return Optional.of(claims.getClaimAsString("email"));
     };
   }
