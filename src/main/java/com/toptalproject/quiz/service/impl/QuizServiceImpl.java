@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 class QuizServiceImpl implements QuizService {
+  public static final String LOGGED_IN_USER = "LOGGED_IN_USER";
   private final QuizRepository quizRepository;
   private final QuestionRepository questionRepository;
   private final OptionRepository optionRepository;
@@ -170,7 +171,7 @@ class QuizServiceImpl implements QuizService {
   public QuizPage getQuizzesAuthoredByMe(final int pageNo, final int limit) {
     final String currentUser =
         principal.getCurrentAuditor()
-            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+            .orElseThrow(() -> new NotFoundException(LOGGED_IN_USER, null));
     log.info("getting quizzes with authored by ={}, pageNo={},limit = {}", currentUser,
         pageNo, limit);
 
@@ -194,7 +195,7 @@ class QuizServiceImpl implements QuizService {
   public QuizPage getAvailableQuizzesToTake(int pageNo, int limit) {
     final String currentUser =
         principal.getCurrentAuditor()
-            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+            .orElseThrow(() -> new NotFoundException(LOGGED_IN_USER, null));
     final List<QuizDto> quizzes =
         quizRepository.findAvailableQuizzesToTake(currentUser, pageNo * limit, limit)
             .stream().map(this::buildQuizDto).toList();
@@ -261,7 +262,7 @@ class QuizServiceImpl implements QuizService {
     }
     final String aud =
         principal.getCurrentAuditor()
-            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+            .orElseThrow(() -> new NotFoundException(LOGGED_IN_USER, null));
 
     if (!quiz.getCreatedBy().equals(aud)) {
       throw new BadRequestException("Quiz not created by the requester");
@@ -289,7 +290,7 @@ class QuizServiceImpl implements QuizService {
         .orElseThrow(() -> new NotFoundException(Quiz.class.getCanonicalName(), id));
     final String aud =
         principal.getCurrentAuditor()
-            .orElseThrow(() -> new NotFoundException("LOGGED_IN_USER", null));
+            .orElseThrow(() -> new NotFoundException(LOGGED_IN_USER, null));
     if (!quiz.getCreatedBy().equals(aud)) {
       throw new BadRequestException("Quiz not created by the requester");
     }
