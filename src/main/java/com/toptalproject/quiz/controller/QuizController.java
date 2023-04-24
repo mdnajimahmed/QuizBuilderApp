@@ -10,6 +10,7 @@ import com.toptalproject.quiz.service.QuizService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -35,21 +36,22 @@ public class QuizController {
   private final QuizService quizService;
 
   @GetMapping("/{id}")
-  public QuizDto getQuizById(@PathVariable("id") final UUID id) {
+  public QuizDto getQuizById(
+      @PathVariable("id") @Valid @NotNull(message = "Quiz id can not be null") final UUID id) {
     return quizService.getQuizById(id);
   }
 
   @GetMapping
   public QuizPage getQuizzesAuthoredByMe(
       @RequestParam("page") @Valid @Min(value = 0, message = "Page number needs to be non zero")
-      final int pageNo, @RequestParam("limit") @Min(1) @Max(100) final int limit) {
+      final int pageNo, @RequestParam("limit") @Valid @Min(1) @Max(100) final int limit) {
     return quizService.getQuizzesAuthoredByMe(pageNo, limit);
   }
 
   @GetMapping("/search")
   public QuizPage searchQuiz(
       @RequestParam("page") @Valid @Min(value = 0, message = "Page number needs to be non zero")
-      final int pageNo, @RequestParam("limit") @Min(1) @Max(100) final int limit) {
+      final int pageNo, @Valid @RequestParam("limit") @Min(1) @Max(100) final int limit) {
     return quizService.getAvailableQuizzesToTake(pageNo, limit);
   }
 

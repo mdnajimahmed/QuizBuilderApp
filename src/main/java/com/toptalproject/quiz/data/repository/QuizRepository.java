@@ -15,6 +15,7 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
       "where q.created_by!=:currentUser AND q.published=true " +
       "AND not exists " +
       "(select 1 from quiz_attempts qa where qa.quiz_id=q.id AND qa.created_by=:currentUser) " +
+      "order by q.published_at desc " +
       "OFFSET :skip ROWS " +
       "FETCH FIRST :limit ROW ONLY;"
   )

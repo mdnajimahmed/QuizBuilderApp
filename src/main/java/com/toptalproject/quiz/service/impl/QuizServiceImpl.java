@@ -174,7 +174,6 @@ class QuizServiceImpl implements QuizService {
             .orElseThrow(() -> new NotFoundException(LOGGED_IN_USER, null));
     log.info("getting quizzes with authored by ={}, pageNo={},limit = {}", currentUser,
         pageNo, limit);
-
     final PageRequest pageRequest =
         PageRequest.of(pageNo, limit, Sort.by("updatedAt").descending());
     final Page<QuizDto> currentQuizDtoPage =
