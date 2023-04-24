@@ -8,7 +8,10 @@ import com.toptalproject.quiz.error.Violation;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.flywaydb.core.internal.util.ExceptionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -65,5 +68,15 @@ public class ControllerAdvisor {
     error.getViolations().add(
         new Violation(null, exception.getMessage()));
     return error;
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<Object> handleDataIntegrityViolation(final DataIntegrityViolationException ex) {
+    Throwable cause = ExceptionUtils.getRootCause(ex);
+    if (cause instanceof ConstraintViolationException) {
+      String message = cause.getMessage();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 }

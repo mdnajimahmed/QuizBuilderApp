@@ -92,3 +92,4 @@ ALTER TABLE IF EXISTS quiz_attempts
 CREATE INDEX quiz_attempt_quiz_createdby_idx ON quiz_attempts (quiz_id, created_by);
 CREATE INDEX quiz_attempt_createdby_idx ON quiz_attempts (created_by);
 CREATE INDEX quiz_attempt_quiz_idx ON quiz_attempts (quiz_id);
+CREATE UNIQUE INDEX idx_unique_title_created_by ON quizzes (title, created_by);

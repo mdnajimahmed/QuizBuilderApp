@@ -1,24 +1,27 @@
 version: '3.8'
 services:
   quizapp:
-    image: ivplay4689/quizapp:1ea2fb
+    image: ivplay4689/quizapp:644c88
     environment:
-      DB_HOST: localhost
+      DB_HOST: postgres
       DB_NAME: postgres
-      DB_PASSWORD: postgres
+      DB_PASSWORD: postgres@1011xyz
       DB_USERNAME: postgres
       POOL_ID: ap-southeast-2_5Xy5gOXtg
       WEB_CLIENT_ID: 3e074qfjrs0ba81g4p8tthhk5u
       WEB_REDIRECT_URI: http://localhost:8080/welcome
     ports:
-      - 80:80
+      - 8080:8080
   postgres:
     image: postgres:15.2-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: postgres@1011xyz
       POSTGRES_DB: postgres
     ports:
       - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
-
+volumes:
+  postgres-data:
