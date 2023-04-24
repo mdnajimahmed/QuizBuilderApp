@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.internal.util.ExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,6 +28,7 @@ public class ControllerAdvisor {
   @ResponseBody
   public ValidationErrorResponse onConstraintValidationException(
       final ConstraintViolationException exception) {
+    log.error("ConstraintViolationException = ", exception);
     final ValidationErrorResponse error = new ValidationErrorResponse();
     for (final ConstraintViolation violation : exception.getConstraintViolations()) {
       error.getViolations().add(
@@ -42,6 +42,7 @@ public class ControllerAdvisor {
   @ResponseBody
   public ValidationErrorResponse onMethodArgumentNotValidException(
       final MethodArgumentNotValidException exception) {
+    log.error("MethodArgumentNotValidException = ", exception);
     final ValidationErrorResponse error = new ValidationErrorResponse();
     for (final FieldError fieldError : exception.getBindingResult().getFieldErrors()) {
       error.getViolations().add(
@@ -54,6 +55,7 @@ public class ControllerAdvisor {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
   public ValidationErrorResponse onEntityNotFoundException(final NotFoundException exception) {
+    log.error("NotFoundException = ", exception);
     final ValidationErrorResponse error = new ValidationErrorResponse();
     error.getViolations().add(
         new Violation(null, exception.getMessage()));
@@ -64,6 +66,7 @@ public class ControllerAdvisor {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ResponseBody
   public ValidationErrorResponse onBadRequestException(final BadRequestException exception) {
+    log.error("BadRequestException = ", exception);
     final ValidationErrorResponse error = new ValidationErrorResponse();
     error.getViolations().add(
         new Violation(null, exception.getMessage()));
@@ -71,12 +74,15 @@ public class ControllerAdvisor {
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
-  public ResponseEntity<Object> handleDataIntegrityViolation(final DataIntegrityViolationException ex) {
-    Throwable cause = ExceptionUtils.getRootCause(ex);
-    if (cause instanceof ConstraintViolationException) {
-      String message = cause.getMessage();
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
-    }
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ResponseBody
+  public ValidationErrorResponse handleDataIntegrityViolation(
+      final DataIntegrityViolationException exception) {
+    log.error("DataIntegrityViolationException = ", exception);
+    Throwable cause = ExceptionUtils.getRootCause(exception);
+    final ValidationErrorResponse error = new ValidationErrorResponse();
+    error.getViolations().add(
+        new Violation(null, cause.getMessage()));
+    return error;
   }
 }
