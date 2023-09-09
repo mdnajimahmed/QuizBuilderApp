@@ -5,11 +5,7 @@ phases:
     runtime-versions:
       java: corretto17
     commands:
-      - if [ -n "$(aws --version 2>&1 | grep 'aws-cli/1')" ]; then pip uninstall -y awscli; fi
-      # Upgrade AWS CLI to the latest version
-      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      - unzip awscliv2.zip
-      - sudo ./aws/install
+      - pip install --upgrade awscli
       - aws --version
       - echo "ECR_REPO_URL = $ECR_REPO_URL"
       - aws ecr get-login-password --region region | docker login --username AWS --password-stdin $ECR_REPO_URL
