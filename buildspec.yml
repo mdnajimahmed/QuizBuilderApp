@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+    commands:
+      # Upgrade AWS CLI to the latest version
+      - pip install --upgrade awscli
+  pre_build:
+    commands:
+      - echo Test started on `date`
+      - echo "skipping test"
+  build:
+    commands:
+      - echo Build started on `date`
+      - ./gradlew clean build -x test
+
+  post_build:
+    commands:
+      - echo "Running post build commands"
+artifacts:
+  files:
+    - build/libs/quiz-0.0.1-SNAPSHOT.jar
