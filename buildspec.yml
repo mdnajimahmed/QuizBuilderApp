@@ -6,8 +6,8 @@ phases:
       java: corretto17
     commands:
       - aws --version
-      - echo "ECR_REPO_URL = $ECR_REPO_URL"
-      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $ECR_REPO_URL
+      - echo "ECR_URL = $ECR_URL"
+      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $ECR_URL
 
   pre_build:
     commands:
@@ -17,8 +17,8 @@ phases:
     commands:
       - echo Build started on `date`
       - ./gradlew clean build -x test
-      - docker build -t $ECR_REPO_URL:$CODEBUILD_RESOLVED_SOURCE_VERSION .
-      - docker push $ECR_REPO_URL:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - docker build -t $ECR_URL/$ECR_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker push $ECR_URL/$ECR_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
 
 
   post_build:
