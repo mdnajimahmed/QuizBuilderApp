@@ -34,7 +34,7 @@ class RegistrationServiceImpl implements RegistrationService {
     final String redirectUriEncoded =
         URLEncoder.encode(appClient.getRedirectUri(), StandardCharsets.UTF_8);
     return String.format(
-        "https://toptalquizapp.auth.ap-southeast-1.amazoncognito.com/signup?client_id=%s&response_type=code&scope=email+openid+phone&redirect_uri=%s",
+        "https://devops-professional.auth.ap-southeast-1.amazoncognito.com/signup?client_id=%s&response_type=code&scope=email+openid+phone&redirect_uri=%s",
         clientId, redirectUriEncoded);
   }
 }
