@@ -47,8 +47,8 @@ class QuizControllerTest {
 
   @BeforeAll
   void setup() throws Exception {
-    quizAuthorToken = cognitoTokenService.getToken("quizCreatorUser@toptalQuizApp.com", "aA.123456789");
-    quizTaker1 = cognitoTokenService.getToken("quizTaker01@toptalQuizApp.com", "aA.123456789");
+    quizAuthorToken = cognitoTokenService.getToken("quizCreatorUser@toptalQuizApp.com", "aA.12345678910");
+    quizTaker1 = cognitoTokenService.getToken("quizTaker01@toptalQuizApp.com", "aA.12345678910");
   }
 
 
