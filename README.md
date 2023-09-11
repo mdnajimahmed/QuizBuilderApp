@@ -17,3 +17,6 @@
 
 # Running the tests locally:
 - To run the tests we also need to provide WEB_CLIENT_SECRET in the environment variable which can be obtained by emailing at najim.ju@gmail.com.
+
+# Deployments:
+- test01
