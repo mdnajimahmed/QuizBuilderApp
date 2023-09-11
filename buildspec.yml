@@ -29,3 +29,14 @@ phases:
 artifacts:
   files:
     - build/libs/quiz-0.0.1-SNAPSHOT.jar
+
+reports:
+  test-result:
+    files:
+      - - '**/*'
+    base-directory: 'build/jacoco/test'
+    file-format: 'JACOCOXML'
+  test-coverage:
+    files:
+      - '**/*'
+    base-directory: 'build/reports/tests/test'
