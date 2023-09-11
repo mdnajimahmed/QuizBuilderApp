@@ -6,6 +6,7 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 @Configuration
 public class HttpAuditConfig {
+    this is nonsense
     @Bean
     public CommonsRequestLoggingFilter requestLoggingFilter() {
         final CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
