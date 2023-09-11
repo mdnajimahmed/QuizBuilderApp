@@ -40,3 +40,4 @@ reports:
     files:
       -  '**/TEST-*.xml'
     base-directory: 'build/test-results/test'
+    file-format: 'JUNITXML'
