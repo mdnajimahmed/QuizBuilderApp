@@ -55,7 +55,7 @@ public class CognitoTokenService {
       authParameters.put("PASSWORD", password);
       authParameters.put("SECRET_HASH", calculateSecretHash(userName));
       CognitoIdentityProviderClient identityProviderClient = CognitoIdentityProviderClient.builder()
-          .region(Region.AP_SOUTHEAST_2)
+          .region(Region.AP_SOUTHEAST_1)
           .credentialsProvider(ProfileCredentialsProvider.create())
           .build();
 
