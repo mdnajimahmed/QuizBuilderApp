@@ -33,7 +33,7 @@ artifacts:
 reports:
   test-result:
     files:
-      - - '**/*'
+      - '**/*'
     base-directory: 'build/jacoco/test'
     file-format: 'JACOCOXML'
   test-coverage:
