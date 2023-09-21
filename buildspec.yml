@@ -29,6 +29,7 @@ phases:
 artifacts:
   files:
     - build/libs/quiz-0.0.1-SNAPSHOT.jar
+    - appspec.yml
 
 reports:
   test-coverage:
