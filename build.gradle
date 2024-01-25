@@ -36,13 +36,18 @@ dependencies {
 	implementation 'software.amazon.awssdk:cognitoidentity'
 	testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.3'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-
+	testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.3'
+	implementation group: 'net.datafaker', name: 'datafaker', version: '2.1.0'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		filter {
+			includeTestsMatching "*Test"
+			excludeTestsMatching "*IT"
+		}
+	}
 }
-
 
 jacocoTestReport {
 	reports {
@@ -55,6 +60,11 @@ jacoco {
 	reportsDir = file("$buildDir/jacoco")
 }
 test {
+//	systemProperties["junit.jupiter.execution.parallel.enabled"] = true
+//	systemProperties["junit.jupiter.execution.parallel.config.fixed.parallelism"] = 4
+//	systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
+//	maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+
 	finalizedBy jacocoTestReport // report is always generated after tests run
 }
 
@@ -67,4 +77,21 @@ jacocoTestCoverageVerification {
 			}
 		}
 	}
+}
+
+
+// isolate unit and integration test
+
+
+
+def integrationTest = tasks.register("integrationTest", Test) {
+	useJUnitPlatform {
+		filter {
+			includeTestsMatching '*IT'
+		}
+	}
+}
+
+tasks.named('check') {
+	dependsOn integrationTest
 }

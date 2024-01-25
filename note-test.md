@@ -1,0 +1,3 @@
+- @WebMvcTest has @ExtendWith(SpringExtension.class) included.
+- If you want to use Spring test framework features in your tests like for example @MockBean,@Autowired then you have to use @ExtendWith(SpringExtension.class).But it does not load the whole spring application context
+- @SpringBootTest loads everything(full application context)

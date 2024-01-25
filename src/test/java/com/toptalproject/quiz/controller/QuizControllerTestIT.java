@@ -27,7 +27,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class QuizControllerTest {
+class QuizControllerTestIT {
   @ClassRule
   public static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
   @LocalServerPort

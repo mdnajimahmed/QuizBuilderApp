@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-class QuizServiceImpl implements QuizService {
+public class QuizServiceImpl implements QuizService {
   public static final String LOGGED_IN_USER = "LOGGED_IN_USER";
   private final QuizRepository quizRepository;
   private final QuestionRepository questionRepository;

@@ -6,7 +6,9 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface QuizRepository extends JpaRepository<Quiz, UUID> {
 
@@ -28,4 +30,8 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
       nativeQuery = true)
   int countAvailableQuizzesToTake(String currentUser);
 
+  @Modifying
+  @Query(value = "UPDATE quizzes SET title = :newTitle WHERE id = :id",nativeQuery = true)
+  @Transactional
+  int updateTitleCustomQuery(UUID id, String newTitle);
 }
