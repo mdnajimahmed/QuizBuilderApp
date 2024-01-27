@@ -10,4 +10,6 @@ spring:
     url: jdbc:tc:postgresql:15.2-alpine://localhost:5432/postgres
 logging:
   level:
-    .: WARN
+    org:
+      springframework:
+        web: trace

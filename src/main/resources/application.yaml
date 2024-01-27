@@ -48,9 +48,7 @@ logging:
         quiz: ${LOGGING_LEVEL:DEBUG}
     org:
       springframework:
-        web:
-          filter:
-            CommonsRequestLoggingFilter: DEBUG
+        web: TRACE
         security: ${LOGGING_LEVEL:INFO}
 
 app:
