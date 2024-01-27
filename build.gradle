@@ -38,6 +38,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.3'
 	implementation group: 'net.datafaker', name: 'datafaker', version: '2.1.0'
+	testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.2.1'
+
 }
 
 tasks.named('test') {

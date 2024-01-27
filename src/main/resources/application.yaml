@@ -17,7 +17,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://cognito-idp.ap-southeast-1.amazonaws.com/${POOL_ID}
+          issuer-uri: https://cognito-idp.ap-southeast-1.amazonaws.com/${POOL_ID:MISSING}
   flyway:
     enabled: true
     baselineVersion: 0.0.0.0
